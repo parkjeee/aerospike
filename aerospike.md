@@ -720,7 +720,7 @@ LLIST LDT 제어 구조는 대규모 리스트 LDT와 관련된 모든 정보를
 
 즉, 심지어 최적 용량을 초과해도, 데이터베이스는 처리중인 요청을 중지하지 않습니다, 이것은 처리중인 사용자 요청을 유지하기 위해 가능한 대로 실행을 계속합니다.
 
-#### 클러스터링
+### 클러스터링
 
 에어로스파이크의 항시 안정적인 보장은 클러스터 실패와 클러스터를 개혁하는 상황에서의 빠른 회복을 감지하는 능력을 가지고 시작합니다.  
 
@@ -763,7 +763,7 @@ LLIST LDT 제어 구조는 대규모 리스트 LDT와 관련된 모든 정보를
 
 예를들어,전체 동쪽 해얀 클러스터가 다운되면 어떤일이 발생합니까? [크로스 데이터 센터 복제](http://www.aerospike.com/docs/architecture/xdr.html)를 사용.
 
-#### 크로스 데이터 센터 복제
+### 크로스 데이터 센터 복제
 
 #### XDR 구조
 
@@ -900,7 +900,7 @@ XDR은 쓰기가 한 클러스터에 생성되고 변경이 다른 또는 쓰기
 
 XDR 운송은 쓰기와 같이 삭제됩니다. 삭제 운송은 모든 데이터 센터와 동기화 객체를 유지하기 위해 중요합니다. 사용자 시작 제거는 기본적으로 운송됩니다. 객체의 퇴거를 통해 생성되는 '제거'는 관리자에 의해 운송되거나 운송되지 않는 걸 선택할 수 있습니다.
 
-#### 랙 인식
+### 랙 인식
 
 에어로스파이크는 너가 마스터 데이터와 복제된 데이터가 동일한 하드웨어 장애 그룹의 서버에 저장되지 않도록 지정할 수 있습니다. 이 기능을 랙 인식이라고 부릅니다.  
 
@@ -950,7 +950,7 @@ XDR 운송은 쓰기와 같이 삭제됩니다. 삭제 운송은 모든 데이�
 
 노드값(포트+그룹+노드로 구성된 64 비트 식별자) 고유해야 합니다. 너가 처음에 랙 인식을 설정할때, 이 유일함을 설정하기 쉽습니다. 그러나 하드웨어가 업그레이드되고 IP 주소 변경으로 시간이 지나서, 유일함을 특히 너가 정적 및 동적 노드 값의 혼합을 가질때 유지하기 어려울 수 있습니다. 그러므로, 우리는 너가 노드 값의 현재 목록을 생성하고 이것을 신중하게 유지하는 걸 추천합니다. 새로운 기계가 클러스터로 들어가고 노드값 충돌이 있을때, 노드간 통신 장애 때문에 클러스터의 잘못된 몇 가지 동작이 있을 수 있습니다.
 
-### 사용자 정의 함수
+## 사용자 정의 함수
 
 #### 사용자 정의 함수
 
@@ -1032,7 +1032,7 @@ UDFs는 클러스터의 시스템 메타데이터(SMD) 구성 요소에 의해 �
 
 대조적으로, UDF는 더 제한됩니다. UDFs는 단일 레코드(레코드 UDF)나 레코드의 선택된 스트림(스트림 UDF) 중 하나에 작동합니다. 그래서, 에어로스파이크 용어에서, 레코드 UDF는 거의 기존 UDF 같이 행동하고 스트림 UDF는 여러 레코드를 처리할 수 있으므로 약간 저장 방법같이 행동합니다.
 
-### 클라이언트
+## 클라이언트
 
 #### 클라이언트 구조
 
@@ -1093,7 +1093,7 @@ CDT = 복잡한 데이터 타입(리스트,맵)
 
 자세한 내용을 위해서, 구조 가이드나 '개발' 탭 아래에 언어별 클라이언트 메뉴얼을 확인하세요.
 
-### ACID
+## ACID
 
 #### ACID
 
@@ -1108,9 +1108,9 @@ CDT = 복잡한 데이터 타입(리스트,맵)
 
 노드 장애의 존재에서 에어로스파이크가 ACID 일관성을 제공하는 방법의 더 자세한 내용은 이 [문서](http://www.aerospike.com/docs/architecture/assets/AerospikeACIDSupport.pdf)에서 설명됩니다.
 
-## 기능 가이드- 무엇인지
+# 기능 가이드- 무엇인지
 
-### 키-값 저장
+## 키-값 저장
 
 #### 키-값 저장
 
@@ -1131,7 +1131,7 @@ CDT = 복잡한 데이터 타입(리스트,맵)
 
 에어로스파이크는 어플리케이션 개발을 위해 풍부한 데이터모델을 제공합니다. 데이터모델에 대한 자세한 내용은 [데이터모델](http://www.aerospike.com/docs/architecture/data-model.html)에서 찾을 수 있습니다.
 
-#### 단일 키
+### 단일 키
 
 ##### 단일 레코드
 
@@ -1232,7 +1232,7 @@ CDT = 복잡한 데이터 타입(리스트,맵)
 1. [Java Client - KVS](http://www.aerospike.com/docs/client/java/usage/kvs/write.html)
 2. [C Client - KVS](http://www.aerospike.com/docs/client/c/usage/kvs/write.html)
 
-#### 배치
+### 배치
 
 ##### 배치
 
@@ -1325,9 +1325,9 @@ batch_tree_count | 모든 배치에 대한 트리 검색의 수.
 batch_timeout | 처리되기 전에 서버에서 타임아웃된 배치의 수.
 batch_q_process_hist | 배치 성능 히스토그램.
 
-#### 스캔
+### 스캔
 
-##### 스캔
+#### 스캔
 
 에어로스파이크는 테이블 또는 네임스페이스의 모든 데이터를 읽기 및 열거하는 기능을 제공합니다.  
 
@@ -1376,7 +1376,7 @@ batch_q_process_hist | 배치 성능 히스토그램.
 
 너는 스캔 관련된 어플리케이션을 개발하는 방법에 대한 자세한 내용을 스캔 개발자 가이드에서 찾을 수 있습니다.
 
-### 쿼리
+## 쿼리
 
 #### 쿼리
 
@@ -1456,18 +1456,18 @@ batch_q_process_hist | 배치 성능 히스토그램.
 인덱스의 생태를 체크:  
 
 	aql > show indexes
-	+------------------------------------------------------------------------------+
+	+---------------------------------------------------------------------------------------------------+
     | ns                 bins           set   num_bins   state   index name   sync_state    type |
-	+------------------------------------------------------------------------------+
-    | "user_profile"  "last_activity"  "west"     1       "WO"   "ix1"   "synced"   "INT SIGNED" |
-	+-----------------------------------------------------------------------------+
+	+---------------------------------------------------------------------------------------------------+
+    | "user_profile"  "last_activity"  "west"     1       "WO"   "ix1"   "synced"   "INT SIGNED"       |
+	+---------------------------------------------------------------------------------------------------+
 	1 row in set (0.000 secs)
 
-	+------------------------------------------------------------------------------+
+	+---------------------------------------------------------------------------------------------------+
     | ns                 bins           set   num_bins   state   index name   sync_state    type |
-	+------------------------------------------------------------------------------+
-    | "user_profile"  "last_activity"  "west"     1       "WO"   "ix1"   "synced"   "INT SIGNED" |
-	+-----------------------------------------------------------------------------+
+	+---------------------------------------------------------------------------------------------------+
+    | "user_profile"  "last_activity"  "west"     1       "WO"   "ix1"   "synced"   "INT SIGNED"       |
+	+---------------------------------------------------------------------------------------------------+
     1 row in set (0.000 secs)
 
 반환된 명령의 출력은 우리에게 다음을 알립니다:
@@ -1522,7 +1522,7 @@ batch_q_process_hist | 배치 성능 히스토그램.
 1. [자바 클라이언트-쿼리](http://www.aerospike.com/docs/client/java/usage/query/query.html)
 2. [C 클라이언트-쿼링 레코드](http://www.aerospike.com/docs/client/c/usage/query/query.html)
 
-### 사용자 정의 함수
+## 사용자 정의 함수
 
 사용자 정의 함수(UDF)는 에어로스파이크 데이터베이스 서버에서 실행하는 루아 프로그래밍 언어에서 작성된 코드입니다. UDF는 기능과 성능의 두 측면에서 에어로스파이크 데이터베이스 엔진의 능력을 확장하는데 사용됩니다.  
 
@@ -1565,7 +1565,7 @@ UDFs는 파일내에 파일의 이름,함수의 이름,그리고 선택적인 �
 
 더 자세한 내용에 대해선 [UDF 가이드](http://www.aerospike.com/docs/udf/udf_guide.html)를 참고하세요.
 
-#### 레코드 UDF
+### 레코드 UDF
 
 레코드 UDF는 단일 레코드를 조작합니다. 레코드 UDF는 스캔과 보조 인덱스 쿼리와 같은 다른 시스템 특징에서 결과 레코드 세트를 실행할 수 있습니다.  
 
@@ -1742,7 +1742,7 @@ UDF를 등록하고 실행하기위해 다음 중 하나(또는 더많이)가 �
 
 * 에어로스파이크는 현재 배치 결과에 레코드 UDF를 지원하지 않습니다.
 
-#### 스트림 UDF
+### 스트림 UDF
 
 에어로스파이크는 분산 방식으로 쿼리의 결과를 필터,변형,그리고 집계하는 능력을 제공합니다.  
 
@@ -1807,7 +1807,7 @@ UDF를 등록하고 실행하기위해 다음 중 하나(또는 더많이)가 �
 
 단일 값을 포함하는 스트림.
 
-##### 집계
+## 집계
 
 연상 바이너리 연산자 ==op==를 사용하는 스트림의 값을 집계. ==op==에서 반환 값은 다음 호출==op==에 매개변수 ==a==로 사용됩니다. 첫번째 호출 ==op==에서, 값은 매개변수 ==x==입니다.
 
@@ -1945,7 +1945,7 @@ UDF를 등록하고 실행하기위해 다음 중 하나(또는 더많이)가 �
 
 더 자세한 내용은 [aql-쿼링 레코드](http://www.aerospike.com/docs/tools/aql/querying_records.html)을 참고하세요(섹션 - '쿼리 결과에 집계').
 
-### 데이터 타입
+## 데이터 타입
 
 에어로스파이크는 데이터의 수를 위해 구축 지원을 가집니다. 이러한 데이터 타입은 아마도 [빈](http://www.aerospike.com/docs/architecture/data-model.html)과 인수의 값에 사용하고 사용자 정의 함수에서 값을 반환합니다.  
 
@@ -2032,7 +2032,7 @@ UDF를 등록하고 실행하기위해 다음 중 하나(또는 더많이)가 �
 1. [자바 클라이언트-예시](http://www.aerospike.com/docs/client/java/)
 2. [씨 클라이언트-예시](http://www.aerospike.com/docs/client/c/)
 
-### 대규모 데이터 타입
+## 대규모 데이터 타입
 
 ##### 소개
 
@@ -2047,7 +2047,7 @@ UDF를 등록하고 실행하기위해 다음 중 하나(또는 더많이)가 �
 * 개발자는 서버에서 클라이언트에 그들이 반환되기 전에 값을 변경하거나 차단하는 UDFs를 통한 접근을 더 최적화합니다.
 * 처리는 클라이언트 어플리케이션을 없애고 네트워크 대역폭 사용을 줄이면서 서버에 푸시됩니다.
 
-##### 시작
+##### 작동법
 
 ###### 네임스페이스 설정
 
@@ -2167,9 +2167,9 @@ LDTs는 상대적으로 적은 크기(1kb 아래)의 객체의 반(수십만명 
 
 이 섹션인 [LDT 구성](http://www.aerospike.com/docs/guide/ldt_configuration.html)은 다양한 LDT 내부 설정([LDT 인터널](http://www.aerospike.com/docs/guide/ldt_internals.html)로 덮인 )과 특정 어플리케이션의 필요를 더 좋게 지원하는 LDT 인스턴스를 가지는 설정을 변경하는 방법을 설명합니다.
 
-#### 대규모 리스트
+### 대규모 리스트
 
-### 대규모 정렬된 리스트
+#### 대규모 정렬된 리스트
 
 ![LDT_Operations_LList.png](LDT_Operations_LList.png)
 
@@ -2192,7 +2192,7 @@ LDTs는 상대적으로 적은 크기(1kb 아래)의 객체의 반(수십만명 
 * 최소 및 최대 검색
 * 단일 값 제거
 
-#### 사용 사례
+##### 사용 사례
 
 대규모 정렬된 리스트는 정렬된 데이터의 모든 타입을 저장하는데 적합합니다. 데이터는 숫자또는 스트링과 같은 단순한 원자 값 또는 리스트,맵 또는 문서와 같은 복잡한 값이 될 수 있습니다. 객체가 원자인 경우에, 대규모 정렬된 리스트는 단순한 리스트 관리를 제공할 수 있습니다(예: 이름 또는 숫자 검색). 객체가 복잡한 경우에, 대규모 정렬된 리스트는 객체의 세트를 넘어 기본 또는 보조 인덱스 같은 인덱싱 서비스를 제공합니다.  
 
@@ -2203,7 +2203,7 @@ LDTs는 상대적으로 적은 크기(1kb 아래)의 객체의 반(수십만명 
 > 표 1  
 고개 연략을 관리하는 큰 리스트를 가진 레코드
 
-### 대규모 데이터 타입(LDT) 어플리케이션 프로그래밍 인터페이스(API)
+#### 대규모 데이터 타입(LDT) 어플리케이션 프로그래밍 인터페이스(API)
 
 LDTs는 다음에서 접근될 수 있습니다:
 
@@ -2212,7 +2212,7 @@ LDTs는 다음에서 접근될 수 있습니다:
 * [에어로스파이크 자바 프로그래밍 언어 클라이언트](http://www.aerospike.com/docs/client/java/usage/ldt/ldt.html)
 * [에어로스파이크 C# 프로그래밍 언어 클라이언트](http://www.aerospike.com/docs/client/csharp/usage/ldt/ldt.html)
 
-#### 복잡한 예시
+#### 완벽한 예시
 
 이 예제에서 우리는 에어로스파이크 [ascli](http://www.aerospike.com/docs/tools/ascli/) 도구와 [aql](http://www.aerospike.com/docs/tools/aql/) 도구를 사용하여 각각의 대규모 리스트 기능의 사용을 설명합니다. 두 도구는 에어로스파이크 서버에 작은 기능을 수행하는데 편리합니다.  
 
@@ -2701,7 +2701,7 @@ lstack에 대한 모든 구성 설정을 포함하는 ==맵==
 
 저장될 수 있는 값의 최대 수를 반환
 
-##### 제한
+#### 제한
 
 * 오름차순 값만
 * 키 값은 숫자나 스트링이어야 햠
@@ -2709,7 +2709,7 @@ lstack에 대한 모든 구성 설정을 포함하는 ==맵==
 * 바이너리 저장소 능력은 공사중
 * 최소/최대 기능은 공사중
 
-##### 향후 특징
+#### 향후 특징
 
 * **캡 컬렉션**: 새로운 것을 위해 자리를 만드는 가장 오래된 시간 값을 퇴거하는 시간에 기반한 컬렉션을 허용합니다. 또는, 일반 캡 컬렉션을 구현하는 기본 키(예: SS#)와 시간 값 둘다 관리하는 대규모 리스트의 쌍을 사용합니다.
 
@@ -2730,7 +2730,7 @@ lstack에 대한 모든 구성 설정을 포함하는 ==맵==
 * 단일 항목 업데이트
 * 단일 값 제거
 
-#### 사용 사례
+##### 사용 사례
 
 대규모 맵은 키("네임")가 숫자 또는 스트링이고 값이 지원된 데이터 타입인 사전을 저장하는 데 적합합니다. 맵은 사용자가 번호 또는 이름으로 인덱스된 연관 배열을 필요로 하는 모든 상황에 유용합니다. 가장 복잡한 객체는 맵으로 바로 바뀔 수 있습니다.  
 
@@ -2741,7 +2741,7 @@ lstack에 대한 모든 구성 설정을 포함하는 ==맵==
 > 표 1  
 부분 리스트를 관리하는 대규모 맵
 
-### 대규모 데이터 타입(LDT) 어플리케이션 프로그래밍 인터페이스(API)
+#### 대규모 데이터 타입(LDT) 어플리케이션 프로그래밍 인터페이스(API)
 
 LDTs는 다음에서 접근될 수 있습니다:
 
@@ -3192,7 +3192,7 @@ lmap에 저장되는 데이터의 양에 따라 이것은 비싸질 수 있습�
 * 단일 항목 업데이트
 * 단입 값 업데이트
 
-#### 사용 사례
+##### 사용 사례
 
 세트는 값 중복에 대한 걱정없이 세트로의 삽입이 "맹목적으로" 되는 고유 컬렉션을 보유하는데 편리합니다. "키"당 한 객체만 세트에 존재합니다.  
 
@@ -3203,7 +3203,7 @@ lmap에 저장되는 데이터의 양에 따라 이것은 비싸질 수 있습�
 > 표 1
 고유 URL 리스트를 관리하는 대규모 세트
 
-### 대규모 데이터 타입(LDT) 어플리케이션 프로그래밍 인터페이스(API)
+#### 대규모 데이터 타입(LDT) 어플리케이션 프로그래밍 인터페이스(API)
 
 LDTs는 다음에서 접근될 수 있습니다:
 
@@ -3671,6 +3671,682 @@ lset에 저장되는 값의 최대 수를 설정
 * 서브레코드 크기(보다 더 적게)로 제한되는 개별 객체(예: 1MB)
 * 바이너리 저장소 용량은 공사중
 
-### 대용량 스택
+### 대규모 스택
 
 ![LDT_Operations_LStack.png](LDT_Operations_LStack.png)
+
+대규모 스택(lstack)은 푸시와 피크와 같은 스택에 기반한 작업에 대해 최적화된 대규모 데이터 타입입니다. lstack은 지속적으로 매우 큰 데이터의 컬렉셕을 키우는 능력을 제공합니다.  
+
+대규모 스택은 특히 현재 사용자 행동이나 트위트 스트림, 본 상품과 같은 시간 직렬 데이터나 방문한 웹사이트나 만든 권장사항을 추적하는 데 적합합니다(The Large Stack is particularly suited for tracking current user behavior or time series data like tweet streams, products viewed, websites visited or recommendations made). 최근의 모든 활동은 lstack에 푸시되고 결정은 최근 데이터를 기반으로 만들어집니다.  
+
+##### 특징
+
+대규모 스택은 다음의 기능을 가집니다:
+
+* 원자나 복잡한 객체 관리
+* 무한 저장소
+* 바이너리 저장소 모드
+* 오래된 컬렉션 요소를 캡 성장과 퇴거하는 능력
+* UDF 조건 필터, UDF 변환
+* 단일 항목 또는 여러 항목 삽입
+* 옵션 UDF 필터를 지닌 스택 지향 검색
+* 옵션 UDF 필터를 지닌 풀 스캔
+* 스택 지향 제거(pop)
+
+##### 사용 사례
+
+대규모 스택 타입은 특히 현재 사용자 행동이나 트위트 스트림, 본 상품과 같은 시간 직렬 데이터나 방문한 웹사이트나 만든 권장사항을 추적하는 데 적합합니다.  
+
+표 1은 트위트가 대규모 스택에 축적되고 푸시되는 트위트 스트림의 예시를 보여줍니다. 쿼리는 탑 N 요소가 시험되는 스택의 탑에서 실행될 수 있습니다.
+
+![LDT_Record_LStack.png](LDT_Record_LStack.png)
+
+> 표 1  
+고객 트위트를 과니하는 대규모 스택
+
+#### 대규모 데이터 타입(LDT) 어플리케이션 프로그래밍 인터페이스(API)
+
+LDTs는 다음에서 접근될 수 있습니다:
+
+* [사용자 정의 함수](http://www.aerospike.com/docs/udf/udfs_and_ldts.html)
+* [에어로스파이크 씨 프로그래밍 언어 클라이언트](http://www.aerospike.com/docs/client/c/usage/ldt/index.html)
+* [에어로스파이크 자바 프로그래밍 언어 클라이언트](http://www.aerospike.com/docs/client/java/usage/ldt/ldt.html)
+* [에어로스파이크 씨# 프로그래밍 언어 클라이언트](http://www.aerospike.com/docs/client/csharp/usage/ldt/ldt.html)
+
+#### 완벽한 예시
+
+이 예제에서 우리는 에어로스파이크 [ascli](http://www.aerospike.com/docs/tools/ascli/)도구와 [aql](http://www.aerospike.com/docs/tools/aql/)도구를 사용하여 각각의 대규모 스택(lstack) 기능의 사용을 설명합니다. 두 도구는 에어로스파이크 서버에 작은 작업을 수행하는 데 편리합니다.  
+
+먼저 우리는 이것과 비슷한 ==ascli== 명령을 사용하여 대규모 세트로 요소의 갯수를 삽입:
+
+	ascli udf-record-apply "test" "demo" "Key_1" "lstack" "push" "LSTACK_BIN" 55
+
+이 명령의 세부사항을 살펴보자. ==ascli udf-record-apply==는 네임스페이스 ==test==, 세트 ==demo==과 키 ==Key_1==을 사용하여 레코드에 UDF를 호출합니다.  
+
+우리가 호출하는 UDF는 패키지 ==lstack==에 있고, 이 패키지는 대규모 스택의 구현입니다.  
+
+여기에 해당하는 ==aql==:
+
+	execute lstack.push('LSTACK_BIN', 55) on test.demo where pk = 'Key_1'
+
+==execute== 키워드는 키 ==where pk : 'Key_1'==에 세트 ==on test.demo==와 네임스페이스의 레코드에 ==lstackpush==기능을 호출합니다.
+
+##### peek()
+
+대규모 스택의 탑에서 요소를 검색하기위해서 너는 ==peek()== 기능을 사용하고, 이것은 스택에서 너가 원하는 요소의 갯수인 매개변수를 이용합니다.
+
+###### ascli
+
+	ascli udf-record-apply "test" "demo" "Key_1" "lstack" "peek" "LSTACK_BIN" 1
+
+###### aql
+
+	execute lstack.peek('LSTACK_BIN', 1) on test.demo where pk = 'Key_1'
+
+##### scan()
+
+==scan()== 기능은 전체 대규모 스택을 스캔하고 대규모 스택의 모든 값을 반환합니다.
+
+###### ascli
+
+	ascli udf-record-apply "test" "demo" "Key_1" "lstack" "scan" "LSTACK_BIN"
+
+###### aql
+
+	execute lstack.scan('LSTACK_BIN') on test.demo where pk = 'Key_1'
+
+##### size()
+
+==size()==는 대규모 스택의 요소 갯수를 반환합니다.
+
+###### ascli
+
+	ascli udf-record-apply "test" "demo" "Key_1" "lstack" "size" "LSTACK_BIN"
+
+###### aql
+
+	execute lstack.size('LSTACK_BIN') on test.demo where pk = 'Key_1'
+
+##### get_config()
+
+==get_config()== 기능은 적절히 구성하는한 설정과 현재 값을 나타내는 맵 객체를 반환합니다.
+
+###### ascli
+
+	ascli udf-record-apply "test" "demo" "Key_1" "lstack" "get_config" "LSTACK_BIN"
+
+###### aql
+
+	execute lstack.get_config('LSTACK_BIN') on test.demo where pk = 'Key_1'
+
+##### get_capacity()
+
+==get_capacity()== 기능은 LDT 인스턴스의 최대 용량을 반환합니다. 대규모 스택 LDT는 기본적으로 최대 용량(이것은 기본적으로 무한대로 커짐)을 가지지 않지만, 이것은 우발적 저장소 과용을 막기위해 최대 크기를 설정할 수 있습니다.  
+
+get_capacity()가 바이트가 아닌 아이템의 개념으로 설정 제한을 반환하는 반면에, size() 기능은 LDT의 현재 항목 카운트를 반환합니다.  
+
+대규모 스택은 용량이 도달했을때 오래된 데이터를 퇴거하는 특별한 능력을 가집니다. (대규모 리스트 및 대규모 스택에 가능한)설정 제한이 없을때, get_capacity는 0을 반환합니다.
+
+> 대규모 스택 LDT는 기본적으로 최대 용량(이것은 기본적으로 무한대로 커짐)을 가지지 않지만, 이것은 우발적 저장소 과용을 막기위해 최대 크기를 설정할 수 있습니다. get_capacity()가 바이트가 아닌 아이템의 개념으로 설정 제한을 반환하는 반면에, size() 기능은 LDT의 현재 항목 카운트를 반환합니다. 대규모 스택은 용량이 도달했을때 오래된 데이터를 퇴거하는 특별한 능력을 가집니다. (대규모 리스트 및 대규모 스택에 가능한)설정 제한이 없을때, get_capacity는 0을 반환합니다.
+
+###### ascli
+
+	ascli udf-record-apply "test" "demo" "Key_1" "lstack" "get_capacity" "LSTACK_BIN"
+
+###### aql
+
+	execute lstack.get_capacity('LSTACK_BIN') on test.demo where pk = 'Key_1'
+
+##### destroy()
+
+==destroy()==는 전체 대규모 스택을 제거하고 빈 ==LSTACK_BIN==을 널로 설정합니다. 이것은 효과적으로 빈을 제거합니다.
+
+###### ascli
+
+	ascli udf-record-apply "test" "demo" "Key_1" "lstack" "destroy" "LSTACK_BIN"
+
+###### aql
+
+	execute lstack.destroy('LSTACK_BIN') on test.demo where pk = 'Key_1'
+
+#### 완벽한 ASCLI 예시
+
+이것은 (ascli 명령을 포함하는)완벽한 BASH shell 스크립트 입니다:
+
+	echo "<< -----------  <><><><><><><><><><><><> -------------- >> "
+	echo "<< -----------    LSTACK  ASCLI EXAMPLE  -------------- >> "
+	echo "<< -----------  <><><><><><><><><><><><> -------------- >> "
+
+	echo "UDF/LDT 호출을 위한 포괄적인 형식은 :"
+	echo "ascli udf-record-apply NS SET KEY MODULE FUNCTION ARGS"
+
+	echo "대규모 스택 명령은: "
+	echo " (*) Status = push( topRec, ldtBinName, newValue, userModule )"
+	echo " (*) Status = push_all( topRec, ldtBinName, valueList, userModule )"
+	echo " (*) List   = peek( topRec, ldtBinName, peekCount ) "
+	echo " (*) List   = pop( topRec, ldtBinName, popCount ) "
+	echo " (*) List   = scan( topRec, ldtBinName )"
+	echo " (*) List   = filter( topRec, ldtBinName, peekCount,userModule,filter,fargs)"
+	echo " (*) Status = destroy( topRec, ldtBinName )"
+	echo " (*) Number = size( topRec, ldtBinName )"
+	echo " (*) Map    = get_config( topRec, ldtBinName )"
+	echo " (*) Status = set_capacity( topRec, ldtBinName, new_capacity)"
+	echo " (*) Status = get_capacity( topRec, ldtBinName )"
+
+	echo "LDT에 몇몇의 요소를 추가"
+	set -v
+	ascli udf-record-apply "test" "demo" "Key_1" "lstack" "push" "LSTACK_BIN" 55
+	ascli udf-record-apply "test" "demo" "Key_1" "lstack" "push" "LSTACK_BIN"  5
+	ascli udf-record-apply "test" "demo" "Key_1" "lstack" "push" "LSTACK_BIN" 25
+	ascli udf-record-apply "test" "demo" "Key_1" "lstack" "push" "LSTACK_BIN" 75
+	ascli udf-record-apply "test" "demo" "Key_1" "lstack" "push" "LSTACK_BIN" 15
+	ascli udf-record-apply "test" "demo" "Key_1" "lstack" "push" "LSTACK_BIN" 45
+	ascli udf-record-apply "test" "demo" "Key_1" "lstack" "push" "LSTACK_BIN" 35
+	set +v
+
+	echo "대규모 스택에서 한 요소 얻기"
+	ascli udf-record-apply "test" "demo" "Key_1" "lstack" "peek" "LSTACK_BIN" 1
+
+	echo "LDT 스캔"
+	ascli udf-record-apply "test" "demo" "Key_1" "lstack" "scan" "LSTACK_BIN"
+
+	echo "LDT의 크기 얻기"
+    ascli udf-record-apply "test" "demo" "Key_1" "lstack" "size" "LSTACK_BIN"
+	
+    echo "LDT의 구성 보기"
+	ascli udf-record-apply "test" "demo" "Key_1" "lstack" "get_config" "LSTACK_BIN"
+
+	echo "LDT의 용량 얻기"
+    ascli udf-record-apply "test" "demo" "Key_1" "lstack" "get_capacity" "LSTACK_BIN"
+
+	echo "LDT 제거"
+    ascli udf-record-apply "test" "demo" "Key_1" "lstack" "destroy" "LSTACK_BIN"
+
+	echo "  <><><>  끝!! <><><>"
+
+우리는 다음 출력을 예상합니다:
+
+	$ ./lstack_example.sh 
+	<< -----------  <><><><><><><><><><><><> -------------- >> 
+	<< -----------    LSTACK  ASCLI EXAMPLE  -------------- >> 
+	<< -----------  <><><><><><><><><><><><> -------------- >> 
+	UDF/LDT 호출을 위한 포괄적인 형식은 :
+	ascli udf-record-apply NS SET KEY MODULE FUNCTION ARGS
+	대규모 스택 명령은 :
+ 	(*) Status = push( topRec, ldtBinName, newValue, userModule )
+ 	(*) Status = push_all( topRec, ldtBinName, valueList, userModule )
+ 	(*) List   = peek( topRec, ldtBinName, peekCount ) 
+ 	(*) List   = pop( topRec, ldtBinName, popCount ) 
+ 	(*) List   = scan( topRec, ldtBinName )
+ 	(*) List   = filter( topRec, ldtBinName, peekCount,userModule,filter,fargs)
+ 	(*) Status = destroy( topRec, ldtBinName )
+ 	(*) Number = size( topRec, ldtBinName )
+	 (*)  Map    = get_config( topRec, ldtBinName )
+	 (*) Status = set_capacity( topRec, ldtBinName, new_capacity)
+	 (*) Status = get_capacity( topRec, ldtBinName )
+	LDT에 몇가지 요소를 추가
+	ascli udf-record-apply "test" "demo" "Key_1" "lstack" "push" "LSTACK_BIN" 55
+	0
+	ascli udf-record-apply "test" "demo" "Key_1" "lstack" "push" "LSTACK_BIN"  5
+	0
+	ascli udf-record-apply "test" "demo" "Key_1" "lstack" "push" "LSTACK_BIN" 25
+	0
+	ascli udf-record-apply "test" "demo" "Key_1" "lstack" "push" "LSTACK_BIN" 75
+	0
+	ascli udf-record-apply "test" "demo" "Key_1" "lstack" "push" "LSTACK_BIN" 15
+	0
+	ascli udf-record-apply "test" "demo" "Key_1" "lstack" "push" "LSTACK_BIN" 45
+	0
+	ascli udf-record-apply "test" "demo" "Key_1" "lstack" "push" "LSTACK_BIN" 35
+	0
+	set +v
+	대규모 스택에서 한 요소 얻기
+	[ 35 ]
+	LDT 스캔
+    [ 35, 45, 15, 75, 25, 5, 55 ]
+	LDT의 크기 얻기
+	7
+    LDT의 구성 보기
+	{ "ColdTopFull": "F", "WarmListMax": 100, "ColdListMax": 100, "StoreMode": "L", "PropEsrDigest": 0, "SSMMARY": "LSTACK Summary", "ColdDirListHead": 0, "WarmListDigestCount": 0, "RecType": 1, "PropMagic": "MAGIC", "PropCreateTime": 1400896195085, "LdrEntryCountMax": 100, "WarmListTransfer": 2, "PropBinName": "LSTACK_BIN", "LdrByteEntrySize": 0, "PropLdtType": "LSTACK", "PropVersion": 2, "HotListTransfer": 50, "LdrByteCountMax": 0, "PropItemCount": 7, "HotEntryListItemCount": 7, "HotListMax": 100, "StoreLimit": 100000, "ColdDirRecMax": 5 }
+    LDT의 용량 얻기
+	100000
+    LDT 제거
+	0
+      <><><> 끝!! <><><>
+
+#### 완벽한 AQL 예시
+
+	print '<< -----------  <><><><><><><><><><><><> -------------- >> '
+	print '<< -----------    LSTACK  ASCLI EXAMPLE  -------------- >> '
+	print '<< -----------  <><><><><><><><><><><><> -------------- >> '
+
+	print 'UDF/LDT 호출을 위한 포괄적인 형식은 :'
+	print 'ascli udf-record-apply NS SET KEY MODULE FUNCTION ARGS'
+
+	print '대규모 스택 명령은 :'
+	print ' (*) Status = push( topRec, ldtBinName, newValue, userModule )'
+	print ' (*) Status = push_all( topRec, ldtBinName, valueList, userModule )'
+	print ' (*) List   = peek( topRec, ldtBinName, peekCount ) '
+	print ' (*) List   = pop( topRec, ldtBinName, popCount ) '
+	print ' (*) List   = scan( topRec, ldtBinName )'
+	print ' (*) List   = filter( topRec, ldtBinName, peekCount,userModule,filter,fargs)'
+	print ' (*) Status = destroy( topRec, ldtBinName )'
+	print ' (*) Number = size( topRec, ldtBinName )'
+	print ' (*) Map    = get_config( topRec, ldtBinName )'
+	print ' (*) Status = set_capacity( topRec, ldtBinName, new_capacity)'
+	print ' (*) Status = get_capacity( topRec, ldtBinName )'
+
+	print 'LDT에 몇가지 요소를 추가'
+	execute lstack.push('LSTACK_BIN', 55) on test.demo where pk = 'Key_1'
+	execute lstack.push('LSTACK_BIN',  5) on test.demo where pk = 'Key_1'
+	execute lstack.push('LSTACK_BIN', 25) on test.demo where pk = 'Key_1'
+	execute lstack.push('LSTACK_BIN', 75) on test.demo where pk = 'Key_1'
+	execute lstack.push('LSTACK_BIN', 15) on test.demo where pk = 'Key_1'
+	execute lstack.push('LSTACK_BIN', 45) on test.demo where pk = 'Key_1'
+	execute lstack.push('LSTACK_BIN', 35) on test.demo where pk = 'Key_1'
+
+	print '대규모 스택에서 한 요소 얻기'
+	execute lstack.peek('LSTACK_BIN', 1) on test.demo where pk = 'Key_1'
+
+	print 'LDT 스캔'
+	execute lstack.scan('LSTACK_BIN') on test.demo where pk = 'Key_1'
+
+	print 'LDT의 크기 얻기'
+	execute lstack.size('LSTACK_BIN') on test.demo where pk = 'Key_1'
+
+	print 'LDT의 구성 보기'
+	execute lstack.get_config('LSTACK_BIN') on test.demo where pk = 'Key_1'
+
+	print 'LDT의 용량 얻기'
+	execute lstack.get_capacity('LSTACK_BIN') on test.demo where pk = 'Key_1'
+
+	print 'LDT 제거'
+	execute lstack.destroy('LSTACK_BIN') on test.demo where pk = 'Key_1'
+
+	print ' <><><> 끝!! <><><>'
+
+언어별 예시는 다음에서 볼 수 있습니다:
+
+1. [자바 클라이언트-LDT](http://www.aerospike.com/docs/client/java/usage/ldt/ldt.html)
+2. [씨 클라이언트-LDT](http://www.aerospike.com/docs/client/c/usage/ldt/)
+
+#### 작업
+
+다음은 lstack을 포함하는 빈에 수행되는 작업입니다.
+
+##### push
+
+lstak으로 ==값==을 덧붙임
+
+	push(value: Value) -> Integer
+
+###### 매개변수
+
+* ==값== - 스택의 탑에 푸시하는 값
+
+###### 반환
+
+작업의 결과를 나타내는 상태 코드
+
+##### push_all
+
+lstack에 각 ==값==을 덧붙임
+
+	push_all(values: List) -> Integer
+
+###### 매개변수
+
+* ==값== - 스택의 탑으로 푸시하는 값의 목록
+
+###### 반환
+
+작업의 결과를 나타내는 상태 코드
+
+##### peek
+
+lstack에서 탑 ==n== 값을 피크
+
+	peek(n: Integer) -> List
+
+###### 매개변수
+
+* ==n== - 반환하는 값의 수
+
+###### 반환
+
+lstack에서 탑 ==n==값의 리스트
+
+##### scan
+
+lstack을 스캔하고 모든 값을 반환
+
+	scan() -> List
+
+###### 반환
+
+lstack의 모든 값의 리스트
+
+###### 주의
+
+lstack에 저장되는 데이터의 양에 따라 이것은 비싸질 수도 있습니다.
+
+##### filter
+
+조건 ==p==를 만족하는 첫번째 ==n== 값을 찾기
+
+	filter(n: Integer, p: (value: Value) -> Boolean) -> List
+
+###### 매개변수
+
+* ==n== - 반환하는 값과 일치하는 수
+* ==p== - 각 값에 적용되는 조건. 조건은 주어진 값에 대해 ==참==이나 ==거짓==을 반환하는 기능이어야 합니다.
+
+###### 반환
+
+조건 ==p==를 만조하는 첫번째 ==n== 값의 리스트
+
+##### destroy
+
+lstack 빈과 모든 연관된 데이터를 파괴
+
+	destroy() -> Integer
+
+###### 반환
+
+작업의 결과를 나타내는 상태 코드
+
+##### size
+
+lstack의 값의 수
+
+	size() -> Integer
+
+###### 반환
+
+lstack의 값의 수
+
+##### get_config
+
+lstack의 구성 매개변수 얻기
+
+	get_config() -> Map
+
+###### 반환
+
+lstack에 대한 모든 구성 설정을 포함하는 ==맵==
+
+##### set_capacity
+
+lstack에 저장되는 값의 최대수를 설정
+
+	set_capacity(size: Integer) -> Integer
+
+###### 매개변수
+
+* ==크기== - 값의 최대 수
+
+###### 반환
+
+작업의 결과를 나타내는 상태 코드
+
+##### get_capacity
+
+lstack에 저장되는 값의 최대수 얻기
+
+	get_capacity() -> Integer
+
+###### 반환
+
+저장되는 값의 최대수 반환
+
+#### 제한
+
+* 개별 객체는 설정된 서브레코드 크기보다 더 적어야 합니다.
+
+## LDT 인터널
+
+#### 대규모 데이터 타입 인터널
+
+대규모 데이터 타입의 개념은 비교적 파악하기 쉽습니다- 이것은 몇몇의 추가 기능이 제공되는 레코드 빈에 UDF 호출입니다. 하지만, 커버아래에, 이것뿐만이 아닙니다-- 기계의 상당량과 너가 LDTs를 최대로 활용할때 이해하기 위한 설정이 있습니다.  
+
+먼저, 우리는 각 LDT를 통과하고 기본적인 내용을 보여줍니다. 그리고, 우리는 많이 아는 사용자가 그들의 이익을 위해 활용할 수 있는 것들중 일부를 설명합니다.
+
+##### 대규모 데이터 타입 파일
+
+LDTs의 진실은 LDT 기능을 구현하는 루아 모듈을 가지는 것입니다. 물론, 이런 모듈은 어떤 내용이나 설명이 필요합니다.  
+
+모듈 파일을 어디서 찾는 지부터 살펴보자. 너가 설치된 에어로스파이크를 가질때, 너는 다음 두 장소에서 LDT 모듈 파일을 찾을 수 있습니다:
+
+* /opt/aerospike/sys/udf/lua/external : LDTs의 모든걸 외부적으로 볼 수 있는 기능을 유지
+
+   * llist.lua
+   * lmap.lua
+   * lset.lua
+   * lstack.lua
+   * test.lua
+   * udflib.lua
+
+* /opt/aerospike/sys/udf/lua/ldt : LDT 라이브러리와 내부의 문서 파일을 유지
+
+   * 주요 LDT 모듈
+
+        * lib_llist.lua
+        * lib_lmap.lua
+        * lib_lset.lua
+        * lib_lstack.lua
+
+   * 설정 모듈
+
+        * settings_llist.lua
+        * settings_lmap.lua
+        * settings_lset.lua
+        * settings_lstack.lua
+
+   * 일반 모듈
+
+       * CRC32.lua
+       * ldt_common.lua
+       * ldt_errors.lua
+       * UdfFunctionTable.lua
+
+   * 문서 파일
+
+       * doc_llist.md
+       * doc_lmap.md
+       * doc_lset.md
+       * doc_lstack.md
+
+   * 테스트 파일
+
+       * lib_test.lua
+
+**주요 LDT 모듈**은 실제 LDT 로직을 포함합니다. LDTs는 그들의 기능이 외부적으로 그리고 내부적으로 호출될 수 있도록 라이브러리로 쓰입니다:
+
+* 외부적으로 - (==/opt/aerospike/sys/udf/lua/external==에서 정의된)위의 외부 기능을 호출하는 클라이언트 호출(예: 씨,자바,씨#)이나 도구(예: ascli,aql)를 통해
+* 내부적으로 - 루아 API를 사용하여 LDT 라이브러리 기능을 호출하는 UDFs를 통해
+
+##### LDT 세부사항
+
+다음 섹션에서 우리가 다루는 몇개의 저수준 세부사항입니다:
+
+* **LDT 빈 복잡한 객체(ldtCtrl)**:  
+  각각의 대규모 데이터 타입은 (루아 코드에서 "ldtCtrl"로 불리는 )탑 레코드 빈의 복잡한 객체를 저장합니다. 각 타입이 다른 설정값과 데이터 저장소를 관리할때, 각 LDT 타입은 다른 ldtCtrl 객체를 저장합니다. 우리는 각 LDT 타입의 세부사항으로 넣습니다.
+
+* **컴팩트 리스트**: 컬렉션 타입을 관리하는 "본격 메커니즘"으로 바뀌기전에, 각 LDT는 주요 레코드에 첫번째 N 아이템을 저장하는 메커니즘을 가집니다. 우리는 세부사항을 설명하고 예시를 보여줍니다.
+* **객체 번역**: 객체가 각각의 LDT 컬렉션에 다르게 저장될 지라도, 관리의 일부는 동일하게 머뭅니다. 모든 LDT를 위해서, 이것을 저장소에서 읽은 후 객체를 **비변형**하고 저장소에 쓰이기 전에 이것은 객체를 **변형**시키는 기능의 쌍(UDFs의 형태로)을 지정할 수 있습니다.
+* **저장소 형식**: 각각의 LDTs는 저장소에 대한 두가지 모드를 가집니다: 리스트 모드와 바이너리 모드. 우리는 각각의 세부사항을 보여줍니다.
+* **잔여 조건에 대한 필터 사용**: LDT의 주요 접근은 기본 메커니즘(예: 스택을 위한 가장 최신 N 아이템, 리스트를 위한 범위 쿼리, 맵을 위한 이름/값 쌍, 세트를 위한 직접적인 객체)을 이용하지만, 추가적인 처리가 필요한 시간이 있습니다. 기본 결과를 이동하는 것이 배달 처리를 위해 클라이언트에 설정되는 것보다, 우리는 UDF를 통해 행해지는 추가적인 배달 처리를 허용합니다.
+* **키를 위한 UDFs 또는 값 얻기의 사용**: 대규모 리스트의 경우에서, 저장된 객체를 정렬하는 데 사용되는 키는 원자 타입(예: 숫자 또는 스트링)이어야 합니다. 저장되는 올바른 객체가 복잡할때(예: 숫자 또는 스트링), "키" UDF는 적절한 키 값을 얻는 데 사용됩니다. 비슷하게, "고유 값" UDF는 대규모 세트를 가진 사용을 위해 원자 값을 얻는 데 사용됩니다.
+* **서브레코드 관리**: 에어로스파이크의 서브레코드 저장소 구성요소는 우리가 서브레코드의 사용을 위해 특정 규칙을 허용하는 걸 요구합니다. 따라서, 우리가 UDF에서 LDTs 호출을 반복할때 우리는 고수준 LDT 호출을 지원해야하는 우리의 서브레코드 추적 상태의 일부를 유지해야 합니다.
+
+#### LDT 빈 복잡한 객체(ldtCtrl)
+
+적어도 하나의 LDT를 포함하는 레코드에서, 다음은 적어도 두 개의 빈을 사용합니다:
+
+* 레코드,레코드 버전,레코드 다이제스트의 모든 LDTs의 카운트를 유지하는 특별한 숨겨진 시스템 빈. 이것의 이름은 **LDTCONTROLBIN**이지만, KV ==get== 호출을 가지는 모든 빈을 얻으려고 할때 너는 이것을 볼 수 없습니다; 이것은 일반 KV 작업에서 볼 수 없습니다.
+* 각 LDT를 위해, 구조를 포함하는 사용자 지명 LDT 빈은 LDT 타입에 지정합니다. 그 구조는 "LDT 컨트롤" 또는 너가 코드에서 볼땐 **ldtCtrl**로 언급됩니다. LDT 컨트롤 구조는 두 개의 맵 리스트입니다. 첫번째 맵은 변함없이 모든 LDTs를 지나는 표준 LDT 구성 구조이고, 이것은 다음 정보를 포함합니다:
+
+   * 컬렉션을 위한 아이템 카운트
+   * 버전 넘버
+   * 서브 레코드 카운트
+   * LDT 타입(llist,lmap,lset,lstack)
+   * 이 LDT를 위한 빈 이름
+   * 생성 시간
+
+* 두번째 맵은 LDT 구성과 모든 "탑 레코드" 데이터가 저장되는 곳인 특정 LDT에 관계된 모든 정보를 포함합니다. 또한, 각 LDT에 다르게 수행되더라도, 적은 아이템이 있는 컬렉션은 서브레코드의 생성을 작동합니다. 컬렉션 데이터 요소는 아이템의 **한계** 수가 삽입될때까지 탑 레코드에 보관됩니다. 다음 섹션에서, 각 LDT 타입별 구조를 보세요.
+
+    * [대규모 정렬된 리스트 인터널](http://www.aerospike.com/docs/guide/llist_internals.html)
+    * [대규모 맵 인터널](http://www.aerospike.com/docs/guide/lmap_internals.html)
+    * [대규모 세트 인터널](http://www.aerospike.com/docs/guide/lset_internals.html)
+    * [대규모 스택 인터널](http://www.aerospike.com/docs/guide/lstack_internals.html)
+    * [일반 LDT 기능 인터널](http://www.aerospike.com/docs/guide/common_internals.html)
+
+##### 컴팩 리스트
+
+카운터가 몇몇 설정 가능한 한계 아래일때 각 LDT는 바로 메인 레코드에 항목 갯수를 저장하는 메커니즘을 가집니다. 그러나, 각 LDT는 컴팩 리스트를 다르게 관리합니다. 대규모 스택은 내재적으로 핫 리스트 오버플로우처럼 훌륭하게 웜 리스트에서 나온 객체를 숙성하는 핫 리스트를 관리합니다. 아이템이 핫 리스트 "언더 플로우"와 스택의 밖으로 팝될때, 아이템은 다시 웜 리스트에서 핫 리스트로 이동합니다. 대규모 세트, 대규모 맵과 대규모 정렬된 리스트 각각은 LDT 카운트가 한계값 아래에 있을때 데이터 아이템을 유지하는 ==컴팩 리스트==라고 불리는 LDT 컨트롤 구조의 필드를 가집니다. 컬렉션 아이템이 클 때 한계값은 적절하게(아주 느린 세트처럼) 설절되어야 합니다. 매우 큰 아이템 크기와 대규모 한계값은 레코드 최대 크기를 초과하는 LDT를 야기시킵니다.
+
+##### 객체 변형과 비변형
+
+이것이 저장소에 쓰이기전과 이것을 저장소에서 읽은 후에 사용자는 크기와 객체의 모양을 바꾸는 기회를 가집니다. LDT 생성 시간(암시 또는 명시 생성)에서, 사용자모듈은 쓰기 및 읽기 전에 옵셕적으로 호출될 수 있는 **transform()**과 **untransform()** 기능을 지정합니다.
+
+###### 예제
+
+이 예제에서, 우리는 LStack의 인터널 바이트 저장소에 고정된 크기 객체를 저장하는 데 사용되는 크기 18의 바이트 어레이에 5개 숫자의 리스트를 변환합니다(아래 참조).
+
+* [변화 예시](http://www.aerospike.com/docs/guide/examples/transformation.html)
+
+##### 물리적 저장소
+
+LDTs의 각각은 데이터 저장소를 위해 "리스트 모드"나 "바이너리 모드"를 사용하는 구성 설정을 가집니다. 리스트 모드는 객체를 저장하는 루아 리스트 메커니즘을 사용합니다(아마 크기 변화). 바이너리 모드는 고정된 크기 객체로 변형시킨 객체를 유지하는 바이너리 어레이를 사용합니다(변형 UDF가 필요함). 바이너리 모드는 저장되는 특정 객체의 상태에 따라 표준 리스트 모드를 넘어 일부 저장소나 성능 향상의 결과를 가져옵니다.
+
+###### 예시
+
+이 예제에서 우리는 위에서 생성된 transform()과 untransform()기능을 이용하고, 우리는 바이너리 모드를 선택하는 LDT 구성 설정을 적용하고 적절한 객체 크기를 설정합니다.
+
+* [물리적 저장소 예시](http://www.aerospike.com/docs/guide/examples/physical_storage.html)
+
+###### 주의
+
+현재 대규모 스택에서만 사용될지라도, **바이너리** 저장소 모드 옵션은 모든 LDT 타입에 대해서 곧 사용될 수 있습니다.
+
+##### LDT 필터
+
+LDT의 많은 읽기 기능과 명확하게 LDT 필터 기능: (lstack.filter(),llist.filter(),lmap.filter(),lset.filter())은 읽기/스캔 작업의 결과가 추가 작업의 일부를 수행하는 옵션 UDF를 통과하는 추가 필터링 기능을 제공합니다. LDT 필터는 복잡한 객체(스트림 UDF 필터같은 불린 보단)를 반환해서, 단순히 필터링 이상의 일을 할 가능성이 있습니다. 일반적으로, 초기 LDT 컬렉션 검색후 LDT 필터는 보조 또는 남은 조건의 일부 유형을 평가하는데 사용됩니다. 하지만, 사실, LDT 필터가 거의 모든 걸 할 수 있는 일반용도의 UDF이기 때문에 이것은 개발자의 상상에 의해서만 제한됩니다.  
+
+LDT 필터는 여러 방법으로 관리됩니다:
+
+* LDT 필터는 UdfFunctionTable.lua 파일(LDT 시스템 파일 중 하나)에서 찾을 수 있는 표준 UDFs 중 하나가 될 수 있습니다. 우리는 그 파일에 유용한 UDFs 일부를 넣고, 우리는 우리가 더 유용한 UDFs를 구축하거나 발견할때 커지는 루아 파일을 기대합니다; 이 파일은 변형,비변형,키 얻음,고유 식별자 얻음 및 필터링에 대한 유용한 기능을 포함합니다. 이 특정 시스템의 루아 파일에서 사용하는 UDFs의 장점 중 하나는 그들이 일반 사용자가 제공하는 UDF에 대한 경우와 같이 등록될 필요가 없다는 것입니다.
+* LDT 필터는 초기 LDT 생성의 일부로 지정된 사용자의 **사용자모듈**에 포함될 수 있습니다. 이 루아 사용자모듈은 일반적인 방법으로 등록되야 합니다.(아래 예시)
+* LDT 필터는 읽기 기능 자체에 포함되는 "오버라이드" 모듈에 포함될 수 있습니다. 이 루아 모듈은 일반적인 방법으로 등록되어야 합니다(또한, 아래 예시). LDTs의 각각은 다음과 같은 filter() 기능을 가집니다:
+
+	(List)  = filter( topRec, ldtBinName, userModule, filter, fargs )
+
+리스트로 **사용자모듈**이 특별한 루아 파일을 지명하고, **필터**가 실제 필터 기능을 지명하고, **fargs**가 필터 기능에 전달되는 인수의 리스트를 나타내는 곳
+
+###### 우선
+
+동일한 이름을 가진 필터는 위에 언급된 위치 각각에 존재할 수 있습니다. 필터의 우선 순위는 다음과 같습니다:
+
+1. 오버라이드 모듈에 지명된 필터가 있을때, 이것이 먼저 선택됩니다.
+2. 오버라이드 모듈에 지명된 필터가 없을때, 이것은 생성 모듈에 존재하지 않고, 생성 모듈 필터가 선택됩니다.
+3. 오버라이드 또는 생성 모듈에 지명된 필터가 없을때, 표준 시스템 파일인 UdfSystemTable이 실행되고 거기에서 지명된 파일을 발견할때, 그것이 선택됩니다.
+
+###### 예시
+
+우리는 두 예시를 보여줍니다. 첫번째(선택 필터)는, 특정 요소를 선택하는 하드 코드된 UDF입니다. 이것이 일반적으로 사용되는 고정된 쿼리(즉, 고정 조건)에 나타날때 UDF 필터의 이 타입은 그런 경우에 대해서 일반적입니다. 두번째 예(범위 필터)는 합성 범위 조건을 나타내느 JSON 객체에 전달하는 호출자를 허용하는 유연성 있는 UDF입니다. 범위 필터 예는 상한 및 하한 바운드를 가진 각각에 전달되는 여러 필드를 허용합니다.
+
+1. [선택 필터 예시](http://www.aerospike.com/docs/guide/examples/selection_filter.html)
+2. [범위 필터 예시](http://www.aerospike.com/docs/guide/examples/range_filter.html)
+
+##### 키와 고유 값 얻기
+
+###### 예시
+
+우리가 복잡한 객체(예: 리스트나 맵)에서 값을 얻을 필요가 있는 두 개의 다른 상황이 있습니다. 대규모 정렬된 리스트 컬렉션의 사용에 대한 복잡한 객체에서 원자 값(예: 숫자나 스트링)을 얻을 필요가 있는 것이 첫번째 경우입니다. 그 값은 간단하고 순서대로 넣어야 합니다. 두번째 경우는 우리가 대규모 세트 컬렉션의 사용을 위한 해시 기능으로 공급하는 원래 객체보다 더 작은 객체 일부를 얻을 필요가 있는 것입니다.
+
+1. [키 기능 예시](http://www.aerospike.com/docs/guide/examples/key_function.html)
+2. [고유 값 기능 예시](http://www.aerospike.com/docs/guide/examples/unique_function.html)
+
+### 대규모 리스트 인터널
+
+### 대규모 정렬된 리스트 인터널
+
+#### 소개
+
+대규모 정렬된 리스트(LLIST)는 객체가 바로 비교할 수 있거나 이것이 비교가능한 값을 생산하는 객체를 허용하는 "Key()" 기능을 가지는 것 중 하나로 제공되는 객체의 모든 타입을 받아들입니다. 이것은 비교를 위해 사용되는 값이 모두 동일한 타입인 제한을 가지고, 그 타입은 함축적으로 리스트에 삽인되는 첫번째 값의 타입에 의해 결정됩니다. 보조 LDT 기능 설정에 대한 자세한 내용은 [LDT 설정](http://www.aerospike.com/docs/guide/ldt_configuration.html)섹션에서 다룹니다.
+
+#### LDT 컨트롤 구조
+
+사용자가 LLIST 빈을 생성할때, 새로운 LDT 빈은 LDT 데이터 구조와 구성 설정을 유지하는 복잡한 LDT 컨트롤 구조를 제공합니다.(표 1과 2)
+
+ 	"ldtCtrl"로 알려진 LDT 빈의 내용은 두개 맵의 리스트로 이뤄진 구조를 제어합니다. 첫번째 맵(LDT 속성 맵)은 모든 LDTs를 공통으로 지나는 필드를 가집니다. 두번째 맵(LDT 컨트롤 맵)은 LDT의 특정 타입에 지정하는 필드와 LDT 인스턴스에 지정하는 값을 가집니다.
+
+	 DB 레코드: 표준 "서브레코드" 모드
+	 +----+----+----+---+------+---+-----+
+	 |LDT |User|User| o |LLIST | o |User |
+	 |Ctrl|Bin |Bin | o |Bin   | o |Bin  |
+	 |    |1   |2   | o |      | o |N    |
+	 +----+----+----+---+------+---+-----+
+	                      |
+	                      V
+	                   +==================+
+	 ldtCtrl: 두 맵의  | LDT Property Map |
+	 리스트 :          +------------------+
+	 (1) ldtProp       | LDT Control Map  |
+	 (2) ldtMap        +==================+
+	
+	 표 1: DB 레코드의 시각 설명과 LDT 빈
+
+적어도 한 LDT를 포함하는 데이터베이스 레코드는 (사용가 숨긴)특별한 시스템 LDT 컨트롤 빈과 (이 경우엔, LLIST 빈)한 LDT 빈을 가집니다. 대규모 맵 컨트롤 구조(ldtCtrl)는 두 맵의 리스트입니다.
+
+#### LDT 속성 맵
+
+첫번째 맵(LDT 속성 맵)은 모든 LDTs의 공통 필드 세트입니다:
+
+* ItemCount : LDT의 모든 아이템의 카운트
+* Version : 코드 버전
+* SubRecCount : LDT의 서브레코드 수
+* LdtType : 타입: 스택,세트,맵,리스트
+* BinName : LDT 빈 이름
+* Magic : 특별한 상수(확인을 위한)
+* CreateTime : LDT의 서버 생성 시간
+* EsrDigest : ESR의 다이제스트
+* RecType : 레코드의 타입
+
+#### LDT 컨트롤 맵
+
+ 	       LLIST 컨트롤 맵
+           +============+
+           |   LLIST    |
+           |   control  |
+           +<><><><><><>+
+           | (Root Dir) |
+           |  Key List  |
+           |  SRP List  |
+           +============+
+
+	표 2: LLIST 컨트롤 맵 구조
+
+두번째 맵(표 2)은 모든 LDTs에 공통인 일부와 대규모 맵에 지정하는 일부인 값의 세트를 보유합니다:
+
+* 이 필드는 모든 LDTs 전체에서 동일합니다. 그들은 ldt_common.lua 기능에 의해 관리됩니다:
+
+     * UserModule : 구성과 오버라이드에 대한 사용자의 루아 파일
+     * KeyFunction : 사용자 지원 키 얻기 기능
+     * KeyType : 사용된 키의 타입(원자,복잡한)
+     * StoreMode : 리스트 모드나 바이너리 모드
+     * StoreLimit : 퇴거를 위해 사용되는
+     * Transform : 루아를 바이트 형식으로 변환
+     * UnTransform : 바이트에서 루아 형식으로 변환
+
+* 이 필드는 대규모 리스트에 지정하고, 그들은 lib_llist.lua 기능에 의해 관리됩니다:
+
+     * **트리 수준 값**
+     * TotalCount : LLIST에서 사용되는 모든 "공간"의 카운트
+     * LeafCount : 모든 leaf 노드의 카운트
+     * NodeCount : 모든 노드의 카운트(leaves를 포함하는)
+     * TreeLevel : 트리 레벨(루트;;내부 노드;;leaves)
+     * KeyDataType : 키의 데이터 타입(숫자,스트링)
+     * KeyUnique : 키들이 고유한지?(참 또는 거짓으로)
+     * StoreState : 컴패트나 일반 저장소
+     * Theshold : 
