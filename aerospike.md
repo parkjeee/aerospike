@@ -4294,7 +4294,7 @@ LDT 필터는 여러 방법으로 관리됩니다:
 	 리스트 :          +------------------+
 	 (1) ldtProp       | LDT Control Map  |
 	 (2) ldtMap        +==================+
-	
+
 	 표 1: DB 레코드의 시각 설명과 LDT 빈
 
 적어도 한 LDT를 포함하는 데이터베이스 레코드는 (사용가 숨긴)특별한 시스템 LDT 컨트롤 빈과 (이 경우엔, LLIST 빈)한 LDT 빈을 가집니다. 대규모 맵 컨트롤 구조(ldtCtrl)는 두 맵의 리스트입니다.
@@ -4339,7 +4339,7 @@ LDT 필터는 여러 방법으로 관리됩니다:
      * Transform : 루아를 바이트 형식으로 변환
      * UnTransform : 바이트에서 루아 형식으로 변환
 
-* 이 필드는 대규모 리스트에 지정하고, 그들은 lib_llist.lua 기능에 의해 관리됩니다:
+* 이런 필드는 대규모 세트에 고유하고, 그들은 lib_llist.lua 기능에 의해 관리됩니다:
 
      * **트리 수준 값**
      * TotalCount : LLIST에서 사용되는 모든 "공간"의 카운트
@@ -4349,4 +4349,541 @@ LDT 필터는 여러 방법으로 관리됩니다:
      * KeyDataType : 키의 데이터 타입(숫자,스트링)
      * KeyUnique : 키들이 고유한지?(참 또는 거짓으로)
      * StoreState : 컴패트나 일반 저장소
-     * Theshold : 
+     * Theshold : # 후 : 컴팩트를 트리 모드로 이동
+     * **고정된 길이의 바이트 어레이를 사용할때, 키와 객체의 크기**
+     * R_KeyByteSize : 키의 고정된 크기(바이트로)
+     * R_ObjectByteSize : 객체의 고정된 크기(바이트로)
+     * **상위 노드 트리 루트 디렉토리**
+     * RootListMax : 키 리스트의 길이(서브 레코드 Ptr 리스트는 KL +1)
+     * RootByteCountMax : 루트의 키공간에 관한 바이트의 최대 #
+     * KeyByteArray : 압축 모드일때, 바이트 어레이
+     * DigestByteArray : 압축 모드일때, 바이트 어레이
+     * RootKeyList : 리스트 모드일때, 루트 키 리스트
+     * RootDigestList : 리스트 모드일때, 다이제스트 리스트
+     * CompactList : "트리 모드" 전에 단순한 컴팩 리스트
+     * **LLIST 내부 노드 설정**
+     * NodeListMax : 노드의 아이템의 최대 수(키 + 다이제스트)
+     * NodeByteCountMax : 노드의 키공간에 대한 바이트의 최대 수
+     * **LLIST 트리 leaves(데이터 페이지)**
+     * LeafListMax : leaf 노드의 아이템의 최대 수
+     * LeafByteCountMax : leaf의 객체 공간에 관한 바이트의 최대 수
+     * LeftLeafDigest : Left-most leaf의 레코드 Ptr
+     * RightLeafDigest : Right-most leaf의 레코드 Ptr
+
+이런 컨트롤 맵 항목 각각은 런타임 값(예: RootKeyList, StoreState)이나 설정 매개변수(예: RootListMax, Theshold)를 나타냅니다.  
+
+LDT 컨트롤 맵에 키 항목과 서브레코드 포인터(SRPtr)로 구성되는 B+ 트리 루트 노드가 있습니다.
+
+#### 대규모 정렬된 리스트 B+ 트리 구현
+
+대규모 정렬된 리스트는 B+ 트리 구조로 구현됩니다. B+ 트리는 인기있는 인덱스 메커니즘이고, 이것은 데이터가 지속적인 저장소일때 정렬된 리스트를 관리하는 데 효율적입니다.
+
+	이건 B+ 트리의 샘플 : N 키와 (N+1) 포인터(다이제스트)가 내부 노드(루트를 포함하는)에 있습니다. 모든 데이터는 leaves에 있고, 내부 노드는 키와 포인터뿐 입니다. 실제 B+ 트리 노드가 약 100개(키 크기에 따라 더 많거나 더 적은)의 팬아웃을 가지지만, 여기에서 표현하기엔 너무 어렵습니다.
+
+ 	 	 						   _________
+ 	           (Root 노드)          |_30_|_60_|
+	                              _/      |      \_
+	                            _/        |        \_
+	                          _/          |          \_
+ 	                       _/            |            \_
+	                      _/              |              \_
+	(internal 노드 )    _/                |                \_
+	         ________ _/          ________|              ____\_________
+	        |_5_|_20_|           |_40_|_50_|            |_70_|_80_|_90_|
+	       /    |    |          /     |    |           /     |    |     \
+	      /     |    |         /      |    |          /      |    |     |
+	     /     /     |        /      /     |        _/     _/     |     |
+	    /     /      /       /      /      /       /      /      /      |
+	 +-^-++--^--++--^--+ +--^--++--^--++--^--+ +--^--++--^--++--^--++---^----+
+	 |1|3||6|7|8||22|26| |30|39||40|46||51|55| |61|64||70|75||83|86||90|95|99|
+	 +---++-----++-----+ +-----++-----++-----+ +-----++-----++-----++--------+
+	(Leaf 노드)
+
+	루트,인터널 노드와 Leaf 노드는 다음 속성을 가집니다:
+
+    (1) leaf 페이지의 실제 값과 일치하거나 일치하지 않는 루트와 인터널 노드는 키 값을 저장합니다.
+	(2) 키 값과 객체 값은 오름차순으로 저장됩니다. 우리는 (아직) 오름차순/내림차순을 제공하지 않습니다.
+    (3) 루트, 노드와 Leaves는 키와 객체의 가변수를 가집니다.
+	(4) 루트, 노드와 Leaves는 각각 다른 용량을 가집니다.
+
+
+	표 3: B+ 트리의 예시
+
+LLIST B+ 트리는 서브레코드의 다른 두 유형을 사용합니다. 내부 트리 노드가 키와 노드 포인터를 가지기 때문에, 그들은 데이터 객체만 가지는 leaf 노드에서 다릅니다.
+
+	(내부 노드 서브 레코드)
+	 +------+------+------+
+	 | LDT  | Key  |SR Ptr|
+	 | CTRL | List | List |
+	 | Bin  | Bin  | Bin  |
+	 +------+------+------+
+	    |      |      |
+	    V      V      V
+	 +------+------+------+
+	 | Ctrl |Entry |Entry |
+	 |Struct|Entry |Entry |
+	 |Values|Entry |Entry |
+	 +------+Entry |Entry |
+	        |* * * |* * * |
+	        |Entry |Entry |
+	        +------+------+
+
+	표 4: 내부 트리 노드 서브레코드 구조
+
+
+	(Leaf 노드 서브레코드)
+	 +------+------+------+
+	 | LDT  |Object|Binary|
+	 | CTRL | List |Value |
+	 | Bin  | Bin  |Array |
+	 +------+------+------+
+	    |      |      |
+	    V      V      V
+	 +------+------+------+
+	 | Ctrl |Entry |Bits  |
+	 |Struct|Entry |Bits  |
+	 |Values|Entry |Bits  |
+	 +------+Entry |Bits  |
+	        |* * * |* * * |
+	        |Entry |Bits  |
+	        +------+------+
+
+	표 5: Leaf 노드 서브레코드 구조
+
+##### LDT 구성 매개변수
+
+구성 매개변수는 LDT의 행동을 결정합니다.
+
+##### 일반 매개변수
+
+* UserModule : 사용자가 루아 모듈을 생성(또는 처음 쓰기)에서 정의할때, 루아 모듈 이름은 여기에 저장됩니다. 사용자모듈 내부의 기능은 읽기 및 쓰기 작업의 행동을 결정합니다.
+* KeyFunction : LMAP에서 사용되지 않음
+* KeyType : LMAP에서 사용되지 않음
+* StoreMode : StoreMode 설정은 값 리스트나 바이너리 값 어레이인 값을 사용하는 서브레코드의 빈을 결정합니다. 변형 기능에 따라 이것은 상당한 압축 또는 암호화의 장점을 얻을 수 있습니다.
+* StoreLimit : 항목(또는 무제한의 경우 0)의 최대 수. 퇴거를 위해 사용됩니다.
+* Transform : 저장 전에 루아를 변형
+* UnTransform : 바이트에서 루아 형식으로 변형
+
+##### LLIST-특정 매개변수
+
+우리는 설명과 영향과 함께 상당한 구성 매개변수를 나열합니다.
+
+* **트리 수준 값**
+* KeyDataType : 키가 KT_ATOMIC 일때, 그들을 직접 비교할 수 있습니다. 하지만 그들이 KT_COMPLEX가 아닐때 그들은 원자 키를 얻기위해 KeyFunction()을 필요로 합니다.
+* KeyUnique : 참일때, 단일 키 값에 관한 중복 값은 허용하지 않습니다.
+* StoreState : 일반적으로, 모든 LDTs는 첫 ==Threshold== 삽입이 모두 (컴팩리스트의)탑레코드에 머무는 걸 의미하는 "컴팩 모드"로 시작하고, 모든 서브레코드를 발생시키지 않습니다. (threshold + 1) 삽입의 모든 시점에서, 컴팩리스트는 서브레코드 저장소로 전환되고나서 제거됩니다.
+* Threshold : "일반" 서브레코드 모드로 바뀌기전에 컴팩 리스트에서 가지는 아이템의 수
+* **고정된 길이의 바이트 어레이를 사용할때, 키와 객체의 크기**
+* R_KeyByteSize : 키의 고정된 크기(바이트로)
+* R_ObjectByteSize : 객체의 고정된 크기(바이트로)
+* **탑 노드 트리 루트 디렉토리**
+* RootListMax : 키 리스트의 길이(서브레코드 Ptr 리스트는 KL + 1)
+* RootByteCountMax : 루트의 키공간에 관한 바이트의 최대 #
+* **LLIST 내부 노드 설정**
+* NodeListMax : 노드의 아이템의 최대 수(키 + 다이제스트)
+* NodeByteCountMax : 노드의 키공간에 관한 바이트의 최대 수
+* **LLIST 트리 Leaves(데이터 페이지)**
+* LeafListMax : leaf 노드의 아이템의 최대 수
+* LeafByteCountMax : leaf의 객체 공간에 관한 바이트의 최대 수
+
+#### 표준리스트 구성 설정
+
+다음 패키지인 **표준리스트**는 "중간" LMAP 인스턴스를 정의하는 구성 매개변수 설정의 예입니다. [LDT 구성](http://www.aerospike.com/docs/guide/ldt_configuration.html)섹션에서, 우리는 여러 설정 옵션을 설명합니다.
+
+	  -- ======================================================================
+	  -- 이것은 표준(기본) 설정입니다.
+	  -- 패키지 = "StandardList"
+	  -- ======================================================================
+	    function package.StandardList( ldtMap )
+
+	    -- General Parameters
+	    ldtMap[T.M_Transform] = nil;
+	    ldtMap[T.M_UnTransform] = nil;
+	    ldtMap[T.R_StoreState] = SS_COMPACT; -- "컴팩 모드"로 시작
+	    ldtMap[T.M_StoreMode] = SM_LIST; -- 리스트 모드 사용
+	    ldtMap[T.R_BinaryStoreSize] = nil; -- 우리가 이것을 사용하지 않을 때 공간을 낭비하지 않음
+	    ldtMap[T.M_KeyType] = KT_ATOMIC; -- 원자 키
+	    ldtMap[T.R_Threshold] = DEFAULT_THRESHOLD; -- 이것을 많이 삽입후 REDO
+	    ldtMap[T.M_KeyFunction] = nil; -- 특별한 주의 업음
+	    -- Top Node Tree Root Directory
+	    ldtMap[T.R_RootListMax] = 100; -- 키 리스트의 길이(페이지 리스트는 KL + 1)
+	    ldtMap[T.R_RootByteCountMax] = 0; -- 루트의 키공간에 관한 최대 바이트
+
+	    -- LLIST 내부 노드 설정
+	    ldtMap[T.R_NodeListMax] = 100;  -- 아이템의 최대 # (키 + 다이제스트)
+	    ldtMap[T.R_NodeByteCountMax] = 0; -- 바이트의 최대 #
+
+	    -- LLIST 트리 Leaves (데이터 페이지)
+	    ldtMap[T.R_LeafListMax] = 100;  -- 아이템의 최대 #
+	    ldtMap[T.R_LeafByteCountMax] = 0; -- 데이터 페이지당 바이트의 최대 #
+
+	    return 0;
+	  end -- package.StandardList()
+
+### 대규모 맵 인터널
+
+##### 소개
+
+대규모 맵은 값의 쌍을 받아들입니다: 이름/값 쌍. 이름 객체는 숫자나 스트링같은 원자 타입이어야 합니다. 값 객체는 불린을 제외한 모든 루아 타입(숫자,스트링,바이트,리스트,맵)입니다.
+
+#### LDT 컨트롤 구조
+
+사용자가 LMAP 빈을 생성할때, 새로운 LDT 빈은 LDT 데이터 구조와 구성 설정을 가지는 복잡한 LDT 컨트롤 구조를 제공합니다.
+
+	"ldtCtrl"로 알려진 LDT 빈의 내용은 두 맵의 리스트로 구성된 컨트롤 구조입니다. 첫번째 맵(LDT 속성 맵)은 모든 LDTs에서 공통인 필드를 가집니다. 두번째 맵(LDT 컨트롤 맵)은 LDT의 특정 타입에서 지정한 필드를 가지고, LDT 인스턴스에서 지정한 값을 가집니다.
+
+	DB 레코드: 표준 "서브레코드" 모드
+	 +----+----+----+---+------+---+-----+
+	 |LDT |User|User| o |LMAP  | o |User |
+	 |Ctrl|Bin |Bin | o |Bin   | o |Bin  |
+	 |    |1   |2   | o |      | o |N    |
+	 +----+----+----+---+------+---+-----+
+	                      |
+	                      V
+	                  +==================+
+	 ldtCtrl: a list  | LDT Property Map |
+	 of two maps:     +------------------+
+	 (1) ldtProp      | LDT Control Map  |
+	 (2) ldtMap       +==================+
+
+	표 1: LDT 빈과 DB 레코드의 그림 설명
+
+적어도 한 LDT를 포함하는 데이터베이스 레코드는 (숨겨진)특별한 시스템 LDT 컨트롤 빈과 (이 경우에선, LMAP 빈)한 LDT 빈을 가집니다. 대규모 맵 컨트롤 구조(ldtCtrl)는 두 맵의 리스트입니다.
+
+##### LDT 속성 맵
+
+첫번째 맵(LDT 속성 맵)은 모든 LDTs에 공통 필드의 세트입니다:
+
+* ItemCount : LDT의 모든 아이템의 카운트
+* Version : 코드 버전
+* SubRecCount : LDT의 서브레코드 수
+* LdtType : 타입 : 스택,세트,맵,리스트
+* BinName : LDT 빈 이름
+* Magic : 특별한 상수(확인 위한)
+* CreateTime : LDT의 서버 생성 시간
+* EsrDigest : ESR의 다이제스트
+* RecType : 레코드의 타입
+
+##### LDT 컨트롤 맵
+
+		LMAP 컨트롤 맵
+           +============+
+           |   LMAP     |
+           |   control  |
+           +<><><><><><>+
+           |  Hash Dir  |
+           +VVVVVVVVVVVV|+                          LDR 1
+           |Cell Anchor |----------------------->+--------+
+           |------------|              LDR 2      |Entry 1 |
+           |Cell Anchor |+------------>+--------+ |Entry 2 |
+           +------------+              |Entry 1 | |   o    |
+           |   o o o    |              |Entry 2 | |   o    |
+           |----------- |    LDR N     |   o    | |   o    |
+           |Cell Anchor |+->+--------+ |   o    | |Entry n |
+           +<><><><><><>+   |Entry 1 | |   o    | +--------+
+                            |Entry 2 | |Entry n |
+                            |   o    | +--------+
+                            |   o    |
+                            |   o    |
+                            |Entry n |
+                            +--------+
+
+	표 2: 대규모 맵 제어 구조
+
+둘째 맵(표 2)은 모든 LDTs에 공통으로 가지는 일부와 대규모 맵에 지정한 일부인 값의 세트를 가집니다:
+
+* 이런 필드는 모든 LDTs에서 동일합니다. 그들은 ldt_common.lua 기능에 의해 관리됩니다:
+
+     * UserModule : 구성과 오버라이드에 관한 사용자의 루아 파일
+     * KeyFunction : 키 얻기 기능이 제공되는 사용자
+     * KeyType : 키의 타입(항상 LMAP을 위한 원자)
+     * StoreMode : 리스트 모드나 바이너리 모드
+     * StoreLimit : 퇴거를 위해 사용
+     * Transform : 루아를 바이트 형식으로 변형
+     * UnTransform : 바이트에서 루아 형식으로 변형
+
+* 이런 필드는 대규모 세트에 고유하고, 그들은 lib_lmap.lua 기능에 의해 관리됩니다:
+
+    * LdrEntryCountMax : LDR의 아이템의 최대 #
+    * LdrByteEntrySize : 고정된 객체 크기(바이너리 모드로)
+    * LdrByteCountMax : 서브레코드 바이트 제한
+    * StoreState : "컴팩트 리스트"나 "일반 해시"
+    * TotalCount : 총 삽입 카운트(dels은 카운트 하지않음)
+    * HashDirMark : 선형 해시 어디에 있는지 보여줌
+    * Threshold : 간단한 리스트에서 해시 테이블로 전환
+    * BinListThreshold : Thershold 전환(컴팩 리스트에서 해시 Dir)
+    * CompactNameList : 이름 리스트를 컴팩(컴팩 모드)
+    * CompactValueList : 값 리스트를 컴팩(컴팩 모드)
+    * OverWrite : 주어진 값의 오버라이트 허용
+    * HashDirectory : 해시 항목의 디렉토리
+    * HashCellMaxList : 전환 전에 셀 앵커의 최대 리스트 크기
+
+이런 컨트롤 맵 항목 각각은 런타임 값(예: 해시디렉토리, 저장상태)이나 구성 매개변수(예: LdrEntyCountMax, Theshold)를 나타냅니다.  
+
+LDT 컨트롤 맵에 해시 디렉토리가 있습니다. 해시 디렉토리의 항목 각각에 "셀 앵커"가 있습니다. 셀 앵커는 다음 값을 가집니다:
+
+* 빈 : 해시 디렉토리 셀에 값이 없음
+* 리스트 : 셀에 바로 저장되는 값의 최소 갯수
+* 다이제스트 : 서브레코드에 대한 참조
+* 트리 : 라딕스 트리의 형태로 구성되는 서브레코드 참조(다이제스트)의 리스트
+
+		 (서브 레코드)
+		 +------+------+------+------+
+		 | LDT  | Name |Value |Binary|
+		 | CTRL | List | List |Value |
+		 | Bin  | Bin  | Bin  |Array |
+		 +------+------+------+------+
+		    |      |      |      |
+		    V      V      V      V
+		 +------+------+------+------+
+		 | Ctrl |Entry |Entry| Bits  |
+		 |Struct|Entry |Entry| Bits  |
+		 | o o o|Entry |Entry| Bits  |
+		 +------+Entry |Entry| Bits  |
+		        |o o o |o o o| o o o |
+		        |Entry |Entry| Bits  |
+		        +------+-----+-------+
+
+		표 3: 서브레코드 구조
+
+서브레코드의 구조는 다음(표 3)과 같습니다. 값은 모두 레코드 빈에 저장됩니다 -- 데이터베이스 "탑-레코드"가 사용되는 같은 방식으로 사용되는
+
+* LDT CTRL 빈 : 주요 LDT Ctrl에 비슷하게 상태 값을 보유
+* 네임 리스트 빈 : LMAP 네임의 리스트를 보유
+* 값 리스트 빈 : 리스트 모드일때, LMAP 값의 리스트를 보유
+* 바이너리 값 어레이 빈 : 바이너리 모드일때, LMAP 값의 바이너리 어레이를 보유
+
+#### LDT 구성 매개변수
+
+구성 매개변수는 LDT의 행동을 결정합니다.
+
+##### 일반 매개변수
+
+* UserModule : 사용자가 생성(또는 처음 쓰기)에 루아 모듈을 정의할때, 그 루아 모듈은 여기에 저장됩니다. 사용자모듈 내부의 기능은 읽기 및 쓰기 기능의 행동을 결정합니다.
+* KeyFunction : LMAP에서 사용되지 않음
+* KeyType : LMAP에서 사용되지 않음
+* StoreMode : StoreMode 설정은 값 리스트나 바이너리 값 어레이인 값에 대해 사용되는 서브레코드의 리스트를 결정합니다. 변형 기능에 따라, 이것은 상당한 압축 또는 암호화의 장점을 얻을 수 있습니다.
+* StoreLimit : 아이템의 최대 수(무제한일때 0). 퇴거를 위해 사용
+* Transform : 저장전에 루아 변형
+* UnTransform : 바이트에서 루아 형식으로 변형
+
+##### LMAP 특정 매개변수
+
+우리는 그들의 설명과 영향과 함께 상당한 구성 매개변수를 나열합니다.
+
+* LdrEntryCountMax : 각 서브레코드는 값의 리스트와 이름의 리스트를 가집니다. 서브레코드 오버플로우를 막기위해서, 리스트의 크기는 캡되어야 합니다. 평균 객체 크기를 고려해볼때, 값은 개별 서브레코드가 가져오는 양(대략)을 결정합니다.
+* LdrByteCountMax : "바이너리 모드"일때, 서브레코드 바이트 어레이에 대한 최대 용량(바이트로)
+* LdrByteEntrySize : (값 리스트 대신에 사용되는 **바이너리 값 어레이**를 의미하는)"바이너리 모드"일때, 이 값은 객체의 고정된 크기(바이트로)를 보여줍니다. 바이너리 값 어레이가 "EntrySize" 증가의 리스트로 접근되기 때문에 바이너리 객체는 고정된 크기여야 합니다.
+* StoreState : 일반적으로, 모든 LDTs는 처음 ==Threshold== 삽입 모두 (컴팩리스트의)탑레코드에 머무는 걸 의미하는 "컴팩 모드"로 시작하고, 모든 서브레코드를 발생시키지 않습니다. (Threshold + 1) 삽입의 시점에서, 컴팩리스트는 서브레코드 저장소로 전환되고나서 제거됩니다.
+* Threshold : "일반" 서브레코드 모드로 전환되기 전에 컴팩 리스트에서 보유하는 아이템의 수.
+* OverWrite : 우리가 ==put()== 호출에 의해 오버라이트된 기존 값을 허용하는 경우에 따라 'T'(참) 또는 'F'(거짓) 값으로 오버라이트
+* HashCellMaxList : 해시 디렉토리 셀에서, 우리가 셀을 서브레코드로 변환하기전에 우리는 (리스트의)셀의 아이템의 적은 수를 유지하는 옵션을 허용합니다. 이 값은 그 리스트의 최대 크기를 결정합니다. 너무 많은 대규모 객체(여러 셀 이상)가 레코드 저장 오버플로우를 야기하도록 이 리스트 크기를 설정할때 저장중인 객체의 평균 크기를 고려해야 합니다.
+
+#### 표준List 구성 설정
+
+다음 패키지인 **표준List**는 "중간" LMAP 인스턴스를 정의하는 설정 매개변수의 세트의 예입니다. [LDT 구성](http://www.aerospike.com/docs/guide/ldt_configuration.html)섹션에서, 우리는 여러 설정 옵션을 설명합니다.
+
+	-- ======================================================================
+	-- 이것은 표준 (기본) 설정 입니다.
+	-- 패키지 = "StandardList"
+	-- 서브레코드 디자인, 리스트 모드, 풀 객체 비교, 50,000 객체 제한
+    -- ======================================================================
+	function package.StandardList( ldtMap )
+	  ldtMap[T.M_StoreMode]             = SM_LIST; -- 리스트 모드 사용
+	  ldtMap[T.M_StoreLimit]            = 50000; -- 기본 최대 용량 : 50,000
+	  ldtMap[T.M_Transform]             = nil; -- Std 리스트에서 사용되지 않음
+	  ldtMap[T.M_UnTransform]           = nil; -- Std 리스트에서 사용되지 않음
+	  ldtMap[T.M_StoreState]            = SS_COMPACT; -- "컴팩 모드"로 시작
+	  ldtMap[T.M_BinaryStoreSize]       = nil; -- Std 리스트에서 사용되지 않음
+	  ldtMap[T.M_Modulo]                = DEFAULT_DISTRIB; -- 해시 Dir 크기
+	  ldtMap[T.M_ThreshHold]            = DEFAULT_THRESHHOLD; -- # 이후에 재해시
+	  ldtMap[T.M_LdrEntryCountMax]      = 100; -- 서브레코드당 100 객체
+	  ldtMap[T.M_LdrByteEntrySize]      = nil; -- 여기서 사용하지 않음
+	  ldtMap[T.M_LdrByteCountMax]       = nil; -- 여기서 사용하지 않음
+ 	 ldtMap[T.M_HashType]              = HT_STATIC; -- 스태틱 해시 Dir 사용
+	  ldtMap[T.M_BinListThreshold]      = DEFAULT_BINLIST_THRESHOLD;
+	end -- package.StandardList()
+
+### 대규모 세트 인터널
+
+##### 소개
+
+대규모 세트는 불린을 제외한 모든 루아 타입(숫자,스트링,바이트,리스트,맵)의 객체를 받아들입니다.
+
+#### LDT 컨트롤 구조
+
+사용자가 LSET 빈을 생성할때, 새로운 LDT 빈은 LDT 데이터 구조와 구성 설정을 가지는 복잡한 LDT 제어 구조(표 1과 2)를 제공합니다.
+
+	"ldtCtrl"로 알려진 LDT 빈의 내용은 두 맵의 리스트로 구성된 제어 구조입니다. 첫번째 맵(LDT 속성 맵)은 모든 LDTs에서 동일한 필드를 가집니다. 두번째 맵(LDT 컨트롤 맵)은 LDT의 특정 타이에 지정하는 필드와 LDT 인스턴스에서 지정하는 값을 가집니다.
+
+	DB 레코드: 표준 "서브레코드" 모드
+	 +----+----+----+---+------+---+-----+
+	 |LDT |User|User| o |LSET  | o |User |
+	 |Ctrl|Bin |Bin | o |Bin   | o |Bin  |
+	 |    |1   |2   | o |      | o |N    |
+	 +----+----+----+---+------+---+-----+
+	                      |
+	                      V
+	                  +==================+
+	 ldtCtrl: a list  | LDT Property Map |
+	 of two maps:     +------------------+
+	 (1) ldtProp      | LDT Control Map  |
+	 (2) ldtMap       +==================+
+
+	표 1: LDT 빈과 DB 레코드의 그림 설명
+
+적어도 한 LDT를 포함하는 데이터베이스 레코드는 (숨겨진)특별한 시스템 LDT 컨트롤 빈과 한 LDT 빈(이 경우엔, LSET 빈)을 가집니다. 대규모 세트 컨트롤 구조(ldtCtrl)는 두 맵의 리스트입니다.
+
+##### LDT 속성 맵
+
+첫번째 맵(LDT 속성 맵)은 모든 LDTs에 동일한 필드의 세트입니다:
+
+* ItemCount : LDT의 모든 아이템의 수
+* Version : 코드 버전
+* SubRecCount : LDT의 서브레코드의 수
+* LdtType : 타입: 스택,세트,맵,리스트
+* BinName : LDT 빈 이름
+* Magic : 특별한 상수(확인을 위한)
+* CreateTime : LDT의 서버 생성 시간
+* EsrDigest : ESR의 다이제스트
+* RecType : 레코드의 타입
+
+##### LDT 컨트롤 맵
+
+			 LSET 컨트롤 맵
+	         +============+
+             |   LSET     |
+             |   control  |
+             +<><><><><><>+
+             |  Hash Dir  |
+             +VVVVVVVVVVVV|+                          LDR 1
+             |Cell Anchor |----------------------->+--------+
+             |------------|              LDR 2      |Entry 1 |
+             |Cell Anchor |+------------>+--------+ |Entry 2 |
+             +------------+              |Entry 1 | |   o    |
+             |   o o o    |              |Entry 2 | |   o    |
+             |----------- |    LDR N     |   o    | |   o    |
+             |Cell Anchor |+->+--------+ |   o    | |Entry n |
+             +<><><><><><>+   |Entry 1 | |   o    | +--------+
+                              |Entry 2 | |Entry n |
+                              |   o    | +--------+
+                              |   o    |
+                              |   o    |
+                              |Entry n |
+                              +--------+
+
+		표 2: 대규모 세트 컨트롤 구조
+
+두번째 맵(표 2)은 모든 LDTs에 동일한 값의 세트와 대규모 세트에서 지정한 값의 세트를 가집니다:
+
+* 이런 필드는 모든 LDTs에서 동일합니다. 그들은 ldt_common.lua 기능에 의해 관리됩니다:
+
+   * UserModule : 구성과 오버라이드에 관한 사용자의 루아 파일
+   * KeyFunction : 키 얻기 기능이 지원되는 사용자
+   * KeyType : 키의 타입(항상 LSET에 관한 원자)
+   * StoreMode : 리스트 모드나 바이너리 모드
+   * StoreLimit : 퇴거를 위해 사용
+   * Transform : 루아에서 바이트 형식으로 변형
+   * UnTransform : 바이트에서 루아 형식으로 변형
+
+* 이런 필드는 대규모 세트에 고유하고, 그들은 lib_lset.lua 기능에 의해 관리됩니다:
+
+   * LdrEntryCountMax : LDR의 아이템의 최대 #
+   * LdrByteEntrySize : 고정된 객체 크기(바이너리 모드에서)
+   * LdrByteCountMax : 서브레코드 바이트 제한
+   * StoreState : "컴팩 리스트"나 "정규 해시"
+   * TotalCount : 총 삽입 카운트(dels는 카운트하지 않음)
+   * HashDirSize : 현재 해시 디렉토리 크기 보여주기
+   * HashDirMark : 선형 해시에 있는 위치 보여주기
+   * Threshold : 단순 리스트에서 해시 테이블로 전환
+   * BinListThreshold : Threshold 전환 (컴팩 리스트에서 해시 디렉토리)
+   * CompactNameList : 네임 리스트 컴팩 (컴팩 모드)
+   * CompactValueList : 값 리스트 컴팩 (컴팩 모드)
+   * OverWrite : 주어진 값의 오버라이트 허용
+   * HashDirectory : 해시 항목의 디렉토리
+   * HashCellMaxList : 전환 전에 셀 앵커의 최대 리스트 크기
+
+이런 컨트롤 맵 항목의 각각은 런타임 값(예: 해시디렉토리, 저장상태) 또는 구성 매개변수(예: LdrEntryCountMax, Threshold)를 나타냅니다.  
+
+LDT 컨트롤 맵에 해시 디렉토리가 있습니다. 해시 디렉토리의 항목 각각에 "셀 앵커"가 있습니다. 셀 앵커는 다음 값을 가질 수 있습니다:
+
+   * 빈 : 해시 디렉토리 셀에 값이 없음
+   * 리스트 : 셀에 바로 저장되는 값의 적은 수
+   * 다이제스트 : 서브레코드에 대한 참조
+   * 트리 : 라딕스 트리의 형식으로 구성된 서브레코드 참고의 리스트
+
+			(서브 레코드)
+		 +------+------+------+------+
+		 | LDT  | Name |Value |Binary|
+		 | CTRL | List | List |Value |
+		 | Bin  | Bin  | Bin  |Array |
+		 +------+------+------+------+
+		    |      |      |      |
+		    V      V      V      V
+		 +------+------+------+------+
+		 | Ctrl |Entry |Entry| Bits  |
+		 |Struct|Entry |Entry| Bits  |
+		 | o o o|Entry |Entry| Bits  |
+		 +------+Entry |Entry| Bits  |
+		        |o o o |o o o| o o o |
+		        |Entry |Entry| Bits  |
+		        +------+-----+-------+
+
+		표 3: 서브레코드 구조
+
+서브레코드의 구조는 다음(표 3)과 같습니다. 값은 모두 레코드 빈에 저장됩니다 -- 데이터베이스 "탑레코드"가 사용되는 동일한 방식으로 사용
+
+* LDT CTRL 빈 : 주요 LDT Ctrl에 비슷한 상태 값을 유지
+* 값 리스트 빈 : 리스트 모드일때, LSET 값의 리스트를 유지
+* 바이너리 값 어레이 빈 : 바이너리 모드일때, LSET 값의 바이너리 어레이를 유지
+
+#### LDT 구성 매개변수
+
+구성 매개변수는 LDT의 행동을 결정합니다.
+
+#### 일반 매개변수
+
+* UserModule : 사용자가 생성(또는 처음 쓰기)에 루아 모듈을 정의할때, 그 루아 모듈 이름은 여기에 저장됩니다. 사용자모듈의 내부 기능은 읽기 및 쓰기 작업의 행동을 결정합니다.
+* KeyFunction : "고유_식별자()" 기능은 여기에 저장됩니다. 이것은 전체 객체보다 해시 기능에 적용되는 고유 식별자로 사용하는 LSET 객체의 서브세트를 얻는 KeyFunction에 비슷하게 기능을 사용하는 LSET에 고유한 개념입니다.
+* KeyType : LSET에서 사용하지 않음
+* StoreMode : StoreMode 설정은 값 리스트나 바이너리 값 어레이인 값에 대해 사용되는 서브레코드의 리스트를 결정합니다. 변형 기능에 따라, 이것은 상당한 압축 또는 암호화의 장점을 얻을 수 있습니다.
+* StoreLimit : 아이템의 최대 수(또는 제한이 없을때 0), 퇴거를 위해 사용
+* Transform : 저장전에 루아를 변경
+* UnTransform : 바이트에서 루아 형식으로 변형
+
+##### LSET 특정 매개변수
+
+우리는 설명과 영향과 함께 상당한 구성 매개변수를 나열합니다.
+
+* LdrEntryCountMax : 서브레코드 각각은 이름의 리스트와 값의 리스트를 가집니다. 서브레코드 오버플로우를 예방하기 위해서, 리스트의 크기는 캡되야 합니다. 평균 객체 크기를 고려하면, 이 값은 개별 레코드가 얻는 양(대략적으로)을 결정합니다.
+* LdrByteCountMax : "바이너리 모드"일때, 서브레코드 바이트 어레이에 관한 최대 용량(바이트로)
+* LdrByteEntrySize : (**값 리스트** 대신에 사용되는 **바이너리 값 어레이**를 의미하는)"바이너리 모드"일때, 이 값은 객체의 고정된 길이를 보여줍니다. 바이너리 값 어레이가 "EntrySize" 증가의 리스트로 접근되기 때문에 바이너리 객체는 고정된 길이여야 합니다.
+* StoreState : 일반적으로, 모든 LDTs는 처음 ==Threshold== 삽입 모두 (컴팩리스트의)탑레코드에 머무는 걸 의미하는 "컴팩 모드"로 시작하고, 모든 서브레코드를 발생시키지 않습니다. (Threshold + 1) 삽입의 시점에서, 컴팩리스트는 서브레코드 저장소로 전환되고나서 제거됩니다.
+* Threshold : "일반" 서브레코드 모드로 전환되기 전에 컴팩 리스트에서 보유하는 아이템의 수.
+* OverWrite : 우리가 ==put()== 호출에 의해 오버라이트된 기존 값을 허용하는 경우에 따라 'T'(참) 또는 'F'(거짓) 값으로 오버라이트
+* HashCellMaxList : 해시 디렉토리 셀에서, 우리가 셀을 서브레코드로 변환하기전에 우리는 (리스트의)셀의 아이템의 적은 수를 유지하는 옵션을 허용합니다. 이 값은 그 리스트의 최대 크기를 결정합니다. 너무 많은 대규모 객체(여러 셀 이상)가 레코드 저장 오버플로우를 야기하도록 이 리스트 크기를 설정할때 저장중인 객체의 평균 크기를 고려해야 합니다.
+
+#### 표준List 구성 설정
+
+다음 패키지인 **표준List**는 "중간" LMAP 인스턴스를 정의하는 설정 매개변수의 세트의 예입니다. [LDT 구성](http://www.aerospike.com/docs/guide/ldt_configuration.html)섹션에서, 우리는 여러 설정 옵션을 설명합니다.
+
+	-- ======================================================================
+	-- 이것은 표준(기본) 설정입니다.
+	-- 패키지 = "StandardList"
+	-- 서브레코드 디자인, 리스트 모드, 풀 객체 비교, 50,000 객체 제한
+	-- ======================================================================
+	function package.StandardList( ldtMap )
+	  ldtMap[T.M_StoreMode]             = SM_LIST; -- 리스트 모드 사용
+	  ldtMap[T.M_StoreLimit]            = 50000; -- 기본 최대 용량: 50,000
+	  ldtMap[T.M_Transform]             = nil; -- Std 리스트에서 사용하지 않음
+	  ldtMap[T.M_UnTransform]           = nil; -- Std 리스트에서 사용하지 않음
+	  ldtMap[T.M_StoreState]            = SS_COMPACT; -- "컴팩 모드"로 시작
+	  ldtMap[T.M_BinaryStoreSize]       = nil; -- Std 리스트에서 사용하지 않음
+	  ldtMap[T.M_Modulo]                = DEFAULT_DISTRIB; -- 해시 디렉토리 크기
+	  ldtMap[T.M_ThreshHold]            = DEFAULT_THRESHHOLD; -- # 후에 리해시
+	  ldtMap[T.M_LdrEntryCountMax]      = 100; -- 서브레코드당 100 객체
+	  ldtMap[T.M_LdrByteEntrySize]      = nil; -- 여기에서 안씀
+	  ldtMap[T.M_LdrByteCountMax]       = nil; -- 여기에서 안씀
+	  ldtMap[T.M_HashType]              = HT_STATIC; -- Static Hash Dir 사용
+	  ldtMap[T.M_BinListThreshold]      = DEFAULT_BINLIST_THRESHOLD;
+	end -- package.StandardList()
