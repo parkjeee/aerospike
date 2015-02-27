@@ -4887,3 +4887,182 @@ LDT 컨트롤 맵에 해시 디렉토리가 있습니다. 해시 디렉토리의
 	  ldtMap[T.M_HashType]              = HT_STATIC; -- Static Hash Dir 사용
 	  ldtMap[T.M_BinListThreshold]      = DEFAULT_BINLIST_THRESHOLD;
 	end -- package.StandardList()
+
+### 대규모 스택 인터널
+
+##### 소개
+
+대규모 스택은 에어로스파이크 객체의 모든 타입을 받아들입니다: 스트링,숫자,리스트,맵,바이트. push() 기능은 스택에 LIFO 데이터 구조로 객체를 추가합니다. 실질적으로, 스택은 저종소의 다른 3가지 타입으로 구현됩니다. ("핫 리스트"로 알려진 )스택의 탑은 빠른 접근과 추가적인 I/Os 필요없이 제공하는 탑 레코드에 바로 유지되는 요소의 리스트입니다. ("웜 리스트"로 알려진) 스택의 중간은 데이터 페이지(서브레코드)를 참조하는 서브레코드 포인터(aka 다이제스트)의 목록입니다. 그래서, 적절한 서브레코드 포인트에 관한 접근은 즉각적이고, 데이터 접근은 한 I/O 방식입니다. ("콜드 리스트"로 알려진) 스택의 바닥은  데이터 페이지를 가리키는 디렉토리 페이지의 연관된 리스트입니다. ㅡ래서, 콜드 리스트의 데이터는 두 I/Os 방식입니다 -- 전체 스택의 스캔이 기본적으로 데이터 페이지 읽기의 모든곳에 콜드 디렉토리 I/O로 상환되더라도, 이것은 2 I/Os로 콜드 리스트 읽기의 생각을 속입니다.
+
+#### LDT 컨트롤 구조
+
+사용자가 LSET 빈을 생성할때, 새로운 LDT 빈은 LDT 데이터 구조와 구성 설정을 가지는 복잡한 LDT 제어 구조(표 1과 2)를 제공합니다.
+
+	"ldtCtrl"로 알려진 LDT 빈의 내용은 두 맵의 리스트로 구성된 컨트롤 구조입니다. 첫번째 맵(LDT 속성 맵)은 모든 LDTs에서 공통인 필드를 가집니다. 두번째 맵(LDT 컨트롤 맵)은 LDT의 특정 타입에서 지정한 필드를 가지고, LDT 인스턴스에서 지정한 값을 가집니다.
+
+	 DB 레코드: 표준 "서브레코드" 모드
+	 +----+----+----+---+------+---+-----+
+	 |LDT |User|User| o |LSTACK| o |User |
+	 |Ctrl|Bin |Bin | o |Bin   | o |Bin  |
+	 |    |1   |2   | o |      | o |N    |
+	 +----+----+----+---+------+---+-----+
+	                      |
+	                      V
+	                  +==================+
+	 ldtCtrl: a list  | LDT Property Map |
+	 of two maps:     +------------------+
+	 (1) ldtProp      | LDT Control Map  |
+	 (2) ldtMap       +==================+
+
+	표 1: LDT 빈과 DB 레코드의 그림 설명
+
+적어도 한 LDT를 포함하는 데이터베이스 레코드는 (숨겨진)특별한 시스템 LDT 컨트롤 빈과 한 LDT 빈(이 경우엔, LSET 빈)을 가집니다. 대규모 세트 컨트롤 구조(ldtCtrl)는 두 맵의 리스트입니다.
+
+##### LDT 속성 맵
+
+첫번째 맵(LDT 속성 맵)은 모든 LDTs에 동일한 필드의 세트입니다:
+
+* ItemCount : LDT의 모든 아이템의 수
+* Version : 코드 버전
+* SubRecCount : LDT의 서브레코드의 수
+* LdtType : 타입: 스택,세트,맵,리스트
+* BinName : LDT 빈 이름
+* Magic : 특별한 상수(확인을 위한)
+* CreateTime : LDT의 서버 생성 시간
+* EsrDigest : ESR의 다이제스트
+* RecType : 레코드의 타입
+
+##### LDT 컨트롤 맵
+
+	 LSTACK 컨트롤 맵
+    +-------------------+
+    | LSO 컨트롤 정보     | About 20 different values kept in Ctrl info
+    |...................|
+    |...................|< Oldest ................... Newest>
+    +-------------------+========+========+=======+=========+
+    |<Hot Entry Cache>  | Entry 1| Entry 2| o o o | Entry n |
+    +-------------------+========+========+=======+=========+
+    |...................|HotCache 항목은 레코드에 바로 저장됩니다.
+    |...................|
+    |...................|WarmCache 다이제스트는 레코드에 바로 저장됩니다.
+    |...................|< Oldest ................... Newest>
+    +-------------------+========+========+=======+=========+
+    |<Warm Digest List> |Digest 1|Digest 2| o o o | Digest n|
+    +-------------------+===v====+===v====+=======+====v====+
+	 +-<@>Cold Dir List Head|   |        |                 |
+	 |  +-------------------+   |        |                 |
+	 |                    +-----+    +---+      +----------+
+	 |                    |          |          |     Warm Data(WD)
+	 |                    |          |          |      WD Rec N
+	 |                    |          |          +---=>+--------+
+	 |                    |          |     WD Rec 2   |Entry 1 |
+	 |                    |          +---=>+--------+ |Entry 2 |
+	 |                    |      WD Rec 1  |Entry 1 | |   o    |
+	 |                    +---=>+--------+ |Entry 2 | |   o    |
+	 |                          |Entry 1 | |   o    | |   o    |
+	 |                          |Entry 2 | |   o    | |Entry n |
+	 |                          |   o    | |   o    | +--------+
+	 |                          |   o    | |Entry n |
+	 |                          |   o    | +--------+
+	 |                          |Entry n | "LDR" (LSTACK Data Record) Pages
+	 |                          +--------+ [Warm Data (LDR) Chunks]
+	 |
+	 |
+	 |                           <Newest Dir............Oldest Dir>
+	 +-------------------------->+-----+->+-----+->+-----+-->+-----+-+
+	(DirRec Pages DoubleLink)<-+Rec  |<-+Rec  |<-+Rec  | <-+Rec  | V
+	   The cold dir is a linked  |Chunk|  |Chunk|  |Chunk| o |Chunk|
+	   list of dir pages that    |Dir  |  |Dir  |  |Rec  | o |Dir  |
+	   point to LSO Data Records +-----+  +-----+  +-----+   +-----+
+	   that hold the actual cold [][]:[]  [][]:[]  [][]:[]   [][]:[]
+	   data (cold chunks).       +-----+  +-----+  +-----+   +-----+
+                              | |  |   | |  |   | |  |    | |  |
+	   LDRS (per dir) have age:   | |  V   | |  V   | |  V    | |  V
+	   <Oldest LDR .. Newest LDR> | |::+--+| |::+--+| |::+--+ | |::+--+
+	   As "Warm Data" ages out    | |::|Cn|| |::|Cn|| |::|Cn| | |::|Cn|
+	   of the Warm Dir List, the  | V::+--+| V::+--+| V::+--+ | V::+--+
+	   LDRs transfer out of the   | +--+   | +--+   | +--+    | +--+
+	   Warm Directory and into    | |C2|   | |C2|   | |C2|    | |C2|
+	   the cold directory.        V +--+   V +--+   V +--+    V +--+
+	                              +--+     +--+     +--+      +--+
+	                              |C1|     |C1|     |C1|      |C1|
+                                  +--+     +--+     +--+      +--+
+                                   A        A        A         A
+                                   |        |        |         |
+        [콜드 데이터 (LDR) 청크]  ---+--------+--------+----------+
+
+		표 2: 대규모 스택 컨트롤 구조
+
+두번째 맵(표 2)은 모든 LDTs에 동일한 값의 세트와 대규모 세트에서 지정한 값의 세트를 가집니다:
+
+* 이런 필드는 모든 LDTs에 공통입니다. 그들은 ldt_common.lua 기능에 의해 관리됩니다:
+
+	* UserModule : 사용자가 생성(또는 처음 쓰기)에 루아 모듈을 정의할때, 그 루아 모듈은 여기에 저장됩니다. 사용자모듈 내부의 기능은 읽기 및 쓰기 기능의 행동을 결정합니다.
+	* KeyFunction : LMAP에서 사용되지 않음
+	* KeyType : LMAP에서 사용되지 않음
+	* StoreMode : StoreMode 설정은 값 리스트나 바이너리 값 어레이인 값에 대해 사용되는 서브레코드의 리스트를 결정합니다. 변형 기능에 따라, 이것은 상당한 압축 또는 암호화의 장점을 얻을 수 있습니다.
+	* StoreLimit : 아이템의 최대 수(무제한일때 0). 퇴거를 위해 사용
+	* Transform : 저장전에 루아 변형
+	* UnTransform : 바이트에서 루아 형식으로 변형
+
+이런 필드는 대규모 스택에 고유하고, 그들은 lib_lstack.lua 기능에서 관리됩니다:
+
+* 일반 LSO 팜:
+
+    * StoreMode : 리스트 모드나 바이너리 모드
+    * Transform : 저장전에 객체를 변환하는 UDF
+    * UnTansform : 저장후에 객체를 변환하는 UDF
+
+* LSO 데이터 레코드(LDR) 청크 설정: "청크 생성"으로 통과
+
+   * LdrEntryCountMax : LDR에 아이템의 최대 수(리스트 모드)
+   * LdrByteEntrySize : 고정된 크기 바이트 엔트리의 바이트 크기
+   * LdrByteCountMax : LDR의 바이트의 최대 수(바이너리 모드)
+
+* Hot 엔트리 리스트 설정: 사용자 엔트리의 리스트
+
+   * HotListMax : 우리가 전송할때 리스트의 최대 수
+   * HotListTransfer : 동시에 전송하는 시간
+
+* 웜 다이제스트 리스트 설정: LSO 데이터 레코드의 다이제스트의 리스트
+
+   * WarmListMax : 웜 데이터 레코드 청크의 최대 수
+   * WarmListTransfer : 콜드 저장소로 전송하는 웜 데이터 ㄹ코드의 수
+
+* 콜드 디렉토리 리스트 설정: 디렉토리 페이지의 리스트
+
+   * ColdListMax : 콜드 디렉토리 노드의 리스트 항목 수
+   * ColdDirRecMax : 콜드 디렉토리 레코드의 최대 수
+
+스택,더 길거나 더 짧은 리스트에 저장되는 객체가 나타나는 경우에 타입에 따라  
+
+이 트레이드오프는 [LDT 구성](http://www.aerospike.com/docs/guide/ldt_configuration.html)섹션에서 설명합니다.
+
+	 (Sub-Record)
+	 +------+------+------+
+	 | LDT  |Value |Binary|
+	 | CTRL | List |Value |
+	 | Bin  | Bin  |Array |
+	 +------+------+------+
+	    |      |      |
+	    V      V      V
+	 +------+------+-----+
+	 | Ctrl |Entry |Bits |
+	 |Struct|Entry |Bits |
+	 | o o o|Entry |Bits |
+	 +------+Entry |Bits |
+	        |* * * |* * *|
+	        |Entry |Bits |
+	        +------+-----+
+
+		표 3: 서브레코드 구조
+
+##### 스택 push 작업
+
+lstack의 push() 기능은 다음같이 작동합니다:
+
+* 새로운 아이템은 반대로 유지되는 핫 리스트에 추가됩니다.
+* 핫 리스트가 풀일때, 핫 리스트에 추가되기전에, ("HotListTransfer" 양으로 언급된)핫 리스트의 부분은 웜 리스트에 전송됩니다. 일반적으로, 우리는 핫 리스크 크기의 반으로 "HotListTransfer"을 설정합니다. 그래서, 핫 리스트의 크기가 100일때, 전송량은 50 입니다. 그것은 49에서 50 삽입이 탑레코드만 건들고 추가 I/O가 발생하지 않습니다. 1에서 50 삽입은 삽입의 결과로 보조 I/O를 일으킵니다.
+* 핫리스트,웜 리스트 같이 반대로 유지되고, 데이터 항목 대신에 서브레코드 포인터를 관리하는 걸 기대합니다.
+* 웜리스트에 추가되기전에 웜 리스트가 풀일때, 웜 리스트의 부분은 콜드 리스트에 전송됩니다. 일반적으로, 우리는 웜리스트의 반으로 "WarmListTransfer"을 설정합니다. 그래서, 웜리스트의 기본 크기가 100일때, 우리는 페이지 포인터의 50 서브레코드 가치를 콜드 리스트 디렉토리 헤드의 헤드에 전송합니다.
+* 콜드 리스트는 일반 순서로 유지되는 디렉토리 페이지의 연관된 리스트입니다.
